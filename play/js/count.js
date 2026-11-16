@@ -8,6 +8,8 @@
   window.countEvent = function () {};
   if (/[?&]demo\b/.test(location.search) || window.top !== window) return;   // the self-playing preview is not a visit
   if (!CODE || location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  // Label each visit with the address it came from, so learn28days.org and the github.io copy show separately.
+  window.goatcounter = { path: function (p) { return location.host + p; } };
   const s = document.createElement("script");
   s.async = true;
   s.src = "https://gc.zgo.at/count.js";
