@@ -229,7 +229,7 @@
     return `<div class="phase"><svg viewBox="0 0 100 100">${s}</svg><div>${Object.values(PH).map(([n, c, a, z]) => `<div><span style="display:inline-block;width:12px;height:12px;background:${c};margin-right:8px"></span><strong>${n}</strong> day${a === z ? " " + a : "s " + a + " to " + z}</div>`).join("")}</div></div>`;
   };
 </script>
-<script src="play/js/count.js?v=2"></script>
+<script src="play/js/count.js?v=3"></script>
 <script src="play/js/story.js?v=s4"></script>
 <script>
   const esc = (t) => String(t).replace(/\*\*/g, "");
