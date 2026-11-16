@@ -1004,6 +1004,13 @@
     return h + (open ? "</b>" : "");
   }
 
+  // Hover only picks a row when the mouse actually moves. Redrawing a menu after an arrow key
+  // otherwise fires mouseenter on whatever row sits under a resting cursor, undoing the key press.
+  const mouse = { x: -1, y: -1 };
+  function mouseMoved(e) {
+    if (e.clientX === mouse.x && e.clientY === mouse.y) return false;
+    mouse.x = e.clientX; mouse.y = e.clientY; return true;
+  }
   const UI = {
     dlg: null, menuState: null, cardState: null,
     active() { return !!(this.dlg || this.menuState || this.cardState || this.dayCardState); },
@@ -1052,7 +1059,7 @@
         const c = $("choices");
         c.classList.remove("hidden");
         c.innerHTML = d.choices.map((t, i) => `<div class="opt ${i === d.sel ? "sel" : ""}" data-i="${i}"><span class="cur">▸</span>${t}</div>`).join("");
-        c.querySelectorAll(".opt").forEach((o) => { o.onclick = () => { d.sel = +o.dataset.i; this.dlgKey("ok"); }; o.onmouseenter = () => { if (d.sel !== +o.dataset.i) { d.sel = +o.dataset.i; this.drawDlg(); } }; });
+        c.querySelectorAll(".opt").forEach((o) => { o.onclick = () => { d.sel = +o.dataset.i; this.dlgKey("ok"); }; o.onmousemove = (e) => { if (!mouseMoved(e)) return; if (d.sel !== +o.dataset.i) { d.sel = +o.dataset.i; this.drawDlg(); } }; });
       }
     },
     tickDlg(dt) {
@@ -1110,7 +1117,7 @@
       if (selEl) selEl.scrollIntoView({ block: "nearest" });
       $("modal").querySelectorAll(".row").forEach((el) => {
         el.onclick = () => { m.sel = +el.dataset.i; this.menuKey("ok"); };
-        el.onmouseenter = () => { if (m.sel !== +el.dataset.i) { m.sel = +el.dataset.i; this.drawMenu(); } };
+        el.onmousemove = (e) => { if (!mouseMoved(e)) return; if (m.sel !== +el.dataset.i) { m.sel = +el.dataset.i; this.drawMenu(); } };
       });
     },
     async menuKey(k) {
