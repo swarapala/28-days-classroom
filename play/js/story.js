@@ -53,6 +53,12 @@
     salt:         { t: "Salt, fat, sugar", s: "ACOG", x: "To help relieve PMS symptoms, ACOG suggests cutting back on salt, fat and sugar, and eating smaller meals more often." },
     water:        { t: "Drink enough", s: "CDC", x: "Drinking enough liquids during your period helps wash out your urinary tract and can help prevent infections." },
     pms:          { t: "PMS timing", s: "ACOG", x: "Many women feel physical or mood changes in the days before a period. PMS symptoms show up in the 5 days before a period and end within 4 days after it starts." },
+    hist_cloth:   { t: "History: before store-bought pads", s: "Popular Science", x: "Before stores sold pads, most people in Europe and America used washable cloth rags, and reused them." },
+    hist_kotex:   { t: "History: where pads came from", s: "Popular Science", x: "In World War I, nurses noticed that cellulose bandages soaked up blood well. That inspired Kotex, the first commercially successful pads." },
+    hist_belt:    { t: "History: sanitary belts", s: "Popular Science", x: "From the mid-1800s to the 1970s, pads were held in place with a sanitary belt. Pads with an adhesive strip were introduced in 1969." },
+    hist_tampon:  { t: "History: the first tampons", s: "Popular Science", x: "Tampons with a disposable cardboard applicator were patented in 1931, and became the Tampax brand." },
+    hist_cup:     { t: "History: the first menstrual cup", s: "Popular Science", x: "Actress and entrepreneur Leona Chalmers patented a rubber menstrual cup in 1937." },
+    hist_coupon:  { t: "History: too embarrassed to ask", s: "Popular Science", x: "One early pad brand printed coupons people could push across a store counter so they didn't have to ask for pads out loud. The pads were handed over wrapped in newspaper." },
     irregular:    { t: "Settling in", s: "ACOG", x: "Teen cycles are often irregular, especially in the first few years. ACOG says it may take 6 years or more after a first period for cycles to become regular." }
   };
 
@@ -224,6 +230,19 @@
     return true;
   };
 
+
+  // Grandma Okafor tells one piece of period history each time you talk to her.
+  // Checked against Popular Science, "How WWI and WWII revolutionized period products":
+  // https://www.popsci.com/health/period-product-history/
+  const GRANNY = [
+    ["hist_cloth", "Before store-bought pads", ["Before stores sold pads, most people used washable cloth rags for their periods.", "You'd wash them out and use them again. Every month."]],
+    ["hist_kotex", "Where pads came from", ["In World War One, nurses noticed that cellulose bandages soaked up blood really well.", "That idea led to Kotex, the first store-bought pads that really caught on."]],
+    ["hist_belt", "Sanitary belts", ["When I was your age, pads didn't stick to anything. You wore a sanitary belt around your waist, with clips to hold the pad.", "Pads with a sticky strip only came out in 1969. Be grateful for adhesive, dear!"]],
+    ["hist_tampon", "The first tampons", ["Tampons with a cardboard applicator were patented in 1931.", "The company that sold them became Tampax."]],
+    ["hist_cup", "The first menstrual cup", ["And menstrual cups aren't new either. An actress named Leona Chalmers patented one in 1937.", "It was made of rubber."]],
+    ["hist_coupon", "Too embarrassed to ask", ["People used to be so embarrassed that one brand printed coupons you could slide across the store counter, so you never had to say 'pads' out loud.", "The clerk would hand them over wrapped in newspaper. So don't you be embarrassed, dear. It's just a period."]]
+  ];
+
   // ---------- fallback dialogue ----------
   const pick = (a) => a[Math.floor(Math.random() * a.length)];
   window.DEFAULT_TALK = {
@@ -251,7 +270,16 @@
     coach: async () => say("coach", "Keep your streamline tight and your goggles tighter.", "neutral"),
     t1: async () => say("t1", pick(["Lovely day for a walk.", "Have you seen my cat? Orange. Judgy."]), "smile"),
     t2: async () => say("t2", pick(["Morning!", "That pond has had the same two ducks for six years."]), "smile"),
-    t3: async () => say("t3", pick(["Oh! You're Ruby, right? Tell your mom I said hi.", "When I was your age we used belts and pins for our periods. Be grateful for adhesive, dear."]), "smile"),
+    t3: async () => {
+      const g = G(); const i = g.flags.granny || 0;
+      if (i === 0) await say("t3", "Oh! You're Ruby, right? I'm Grandma Okafor. I've been around long enough to remember how periods used to be. Come find me in the park and I'll tell you.", "smile");
+      if (i >= GRANNY.length) return say("t3", pick(["That's all my stories, dear. Tell me what you learned in health class instead.", "Times change. A period is still just a period. Nothing to be ashamed of."]), "smile");
+      const [id, title, lines] = GRANNY[i];
+      for (const l of lines) await say("t3", l, "smile");
+      g.flags.granny = i + 1;
+      g.facts = g.facts || {};
+      if (!g.facts[id]) { g.facts[id] = true; g.literacy += 1; toast(`Fact Book: ${title}`, "bulb"); }
+    },
     t4: async () => say("t4", "*huff* Can't talk. *huff* Running.", "neutral")
   };
 
@@ -278,6 +306,7 @@
     // ------------------------------------------------------------ DAY 1
     {
       day: 1, kicker: "A REGULAR TUESDAY", title: "Firsts",
+      plan: [[420, "Wake up. Talk to Mom in the kitchen."], [450, "Pack your bag at your desk."], [480, "Health class with Dr. Flo, Room 104."], [670, "Lunch with friends in the hallway."], [900, "School's out. Corner Mart."], [null, "Home: talk to Mom, log your day, sleep."]],
       recap: ["A period is the lining of the uterus leaving the body. It is a normal, healthy part of life.", "Day 1 of the cycle is the first day of bleeding. A normal period lasts 2 to 7 days.", "Pads are the easiest product to start with. Change one at least every 4 to 8 hours."],
       think: "Who are two trusted adults you could go to if you needed a pad, or had a leak, at school?", health: HEALTH.u1, cycleStarted: false, school: true, flowDay: true,
       startTime: H(7), start: ["home", 3, 3, "down"], curfew: H(21),
@@ -338,13 +367,13 @@
           }
         } },
         lunch,
-        { at: H(11, 12), when: () => G().flags.started, run: async () => objective("Lunch: find Riyansh and Keshav in the hallway", { npc: "riyansh" }) },
+        { at: H(11, 12), when: () => G().flags.started, run: async () => objective("Lunch until 11:50 AM: find Riyansh and Keshav in the hallway", { npc: "riyansh" }) },
         { at: H(15), run: async () => {
           const g = G();
           sfx.coin();
           await say("phone", g.d.momKnows ? "Mom: Dr. Flo called from school!! So proud of you. Sent you $15. Grab your own supplies at Corner Mart on the way home. Love you." : "Mom: Hi! Sent you $15 for snacks or whatever you need. Corner Mart is on the way home!");
           stat("money", 15);
-          objective(g.flags.started ? "Buy your own period supplies at Corner Mart" : "Head home", g.flags.started ? { map: "town", x: 14, y: 4 } : { map: "town", x: 5, y: 4 });
+          objective(g.flags.started ? "Buy your own period supplies at Corner Mart (open until 9:00 PM)" : "Head home", g.flags.started ? { map: "town", x: 14, y: 4 } : { map: "town", x: 5, y: 4 });
         } }
       ],
       async afterBath() {
@@ -472,6 +501,7 @@
     // ------------------------------------------------------------ DAY 2
     {
       day: 2, title: "The Heavy One",
+      plan: [[410, "Change in the bathroom. Talk to Mom."], [440, "Pack for school AND swim practice."], [480, "Health class with Dr. Flo, Room 104."], [670, "Lunch with friends."], [930, "Swim practice at the Community Pool."], [null, "Home: log your day, sleep."]],
       recap: ["The first few days of a period are usually the heaviest.", "Cramps happen when chemicals called prostaglandins make the uterus contract. Heat, exercise and sleep help.", "A tampon must be changed every 4 to 8 hours, and never worn longer than 8."],
       think: "What could a friend say or do to help someone who is having a hard period day?", health: HEALTH.u2, sub: "Wednesday", school: true, flowDay: true,
       startTime: H(6, 50), start: ["home", 3, 3, "down"], curfew: H(21), cravingRate: 3,
@@ -569,6 +599,7 @@
     // ------------------------------------------------------------ DAY 5
     {
       day: 5, title: "Winding Down",
+      plan: [[510, "Saturday! Talk to Mom."], [660, "Meet Riyansh and Keshav at Maple Park."], [780, "Free time. Find Grandma Okafor in the park."], [1140, "Bedtime: log your day, sleep."]],
       recap: ["A normal period lasts 2 to 7 days. More than 7 days is a reason to talk with a doctor.", "Liners and period underwear are options for light days.", "Friends can talk about periods without it being weird."],
       think: "Riyansh's cousin has periods that last ten days. What should she do?", sub: "Saturday", school: false, flowDay: true,
       startTime: H(8, 30), start: ["home", 3, 3, "down"], curfew: H(21), cravingRate: 2,
@@ -581,8 +612,8 @@
       canSleep: () => G().time >= H(19),
       async onStart() {
         await say("you", "Saturday. No alarm. Best day.", "happy");
-        await say("phone", "Riyansh: PARK. 11AM. keshav is bringing a frisbee he does not know how to throw");
-        objective("Talk to Mom, then meet the guys at the park (11:00)", { npc: "mom" });
+        await say("phone", "Riyansh: MAPLE PARK. 11AM. by the pond. keshav is bringing a frisbee he does not know how to throw");
+        objective("Talk to Mom, then meet the guys at Maple Park at 11:00 AM", { npc: "mom" });
       },
       talk: {
         mom: async () => {
@@ -595,7 +626,7 @@
           g.stash.underwear = (g.stash.underwear || 0) + 1;
           await itemCard("underwear");
           await say("mom", "And when it's just spotting, a liner is enough. You'll find what works for you.", "neutral");
-          objective("Meet Riyansh and Keshav at the park (11:00)", { npc: "riyansh" });
+          objective("11:00 AM: meet Riyansh and Keshav at Maple Park, across the road (follow the arrow)", { npc: "riyansh" });
         },
         riyansh: async () => {
           const g = G();
@@ -625,6 +656,7 @@
     // ------------------------------------------------------------ DAY 9
     {
       day: 9, title: "Full Battery",
+      plan: [[420, "Talk to Mom, pack your bag."], [480, "Health class with Dr. Flo, Room 104."], [670, "Lunch with friends."], [915, "Science Olympiad tryouts, Room 104."], [null, "Home: log your day, sleep."]],
       recap: ["The cycle has four phases: menstrual, follicular, ovulation and luteal.", "FSH makes follicles in the ovaries grow. Estrogen makes the lining of the uterus grow and thicken.", "Teen cycles are often irregular, so it helps to keep a pad in your bag."],
       think: "Why might two people's cycles be different lengths?", health: HEALTH.u3, sub: "Monday", school: true,
       startTime: H(7), start: ["home", 3, 3, "down"], curfew: H(21), cravingRate: 1.5, energyMul: 0.7,
@@ -685,6 +717,7 @@
     // ------------------------------------------------------------ DAY 14
     {
       day: 14, title: "Mid-Cycle",
+      plan: [[450, "Pack your bag."], [540, "Debate tournament with Keshav, Room 104."], [720, "Free time."], [1140, "Bedtime: log your day, sleep."]],
       recap: ["Ovulation is when an ovary releases an egg. A sudden increase in the hormone LH triggers it.", "In a 28-day cycle, ovulation is about 14 days before the next period.", "Some people feel a one-sided twinge at ovulation. Clear, slippery discharge is normal too."],
       think: "What changes might someone notice in their body around the middle of the cycle?", sub: "Saturday: debate tournament", school: false,
       startTime: H(7, 30), start: ["home", 3, 3, "down"], curfew: H(21), cravingRate: 2,
@@ -737,6 +770,7 @@
     // ------------------------------------------------------------ DAY 21
     {
       day: 21, title: "Slow Mode",
+      plan: [[420, "Pack your bag (snacks!)."], [480, "Health class with Dr. Flo, Room 104."], [670, "Lunch with friends."], [930, "Help Dee at Corner Mart."], [null, "Home: log your day, sleep."]],
       recap: ["After ovulation, progesterone rises and helps prepare the lining of the uterus.", "PMS is a set of body and mood changes in the days before a period.", "Sleep, exercise and regular meals can help."],
       think: "What are healthy ways to take care of yourself on a low-energy day?", health: HEALTH.u4, sub: "Thursday", school: true,
       startTime: H(7), start: ["home", 3, 3, "down"], curfew: H(21, 30), cravingRate: 6, energyMul: 1.35,
@@ -789,6 +823,7 @@
     // ------------------------------------------------------------ DAY 26
     {
       day: 26, title: "Stormy",
+      plan: [[420, "Pack your bag. Your period is due soon."], [480, "Health class with Dr. Flo, Room 104."], [670, "Lunch with Riyansh and Keshav."], [900, "School's out. Free time."], [null, "Home: log your day, sleep."]],
       recap: ["PMS symptoms show up in the 5 days before a period and end within 4 days after it starts.", "Tracking your cycle helps you predict your next period.", "Some signs mean it's time to talk to a doctor, like changing a pad every 1 to 2 hours, or a period longer than 7 days."],
       think: "Mood changes are real, and so are other people's feelings. How did Ruby handle hers? What would you do?", health: HEALTH.u5, sub: "Tuesday", school: true, bloat: true,
       startTime: H(7), start: ["home", 3, 3, "down"], curfew: H(21), cravingRate: 11,
@@ -852,6 +887,7 @@
     // ------------------------------------------------------------ DAY 1 AGAIN
     {
       day: 1, title: "Here We Go Again",
+      plan: [[420, "Pack your bag. Your period could start today."], [480, "Health class: the unit test."], [670, "Lunch with friends."], [940, "Maple Park with Riyansh, Keshav and Zach."], [null, "Home: talk to Mom, log your day, sleep."]],
       recap: ["The menstrual cycle repeats, and tracking helps you see the next period coming.", "Doctors treat the menstrual cycle as a vital sign of health.", "If something seems off, tell a trusted adult. 'That's just how periods are' is not always true."],
       think: "What is one thing you know now that you didn't know before you played?", health: HEALTH.final, sub: "a new cycle", school: true, flowDay: true,
       startTime: H(7), start: ["home", 3, 3, "down"], curfew: H(21), cravingRate: 4,
@@ -862,7 +898,7 @@
       npcs: [MOM_WEEKDAY, ...SCHOOL_DAY, ...MART,
         { id: "zach", look: "zach", at: [[H(15, 10), H(18), "town", 21, 11, "down", 2]] },
         { id: "riyansh", look: "riyansh", at: [[H(15, 40), H(18), "town", 19, 11, "right", 1]] },
-        { id: "keshav", look: "keshav", at: [[H(15, 40), H(18), "town", 22, 9, "down", 1]] }],
+        { id: "keshav", look: "keshav", at: [[H(15, 40), H(18), "town", 21, 12, "up", 1]] }],
       canSleep: () => G().d.sleepOK || G().time >= H(20),
       beforeWarp: leaveHomeCheck,
       async onStart() {
@@ -881,7 +917,7 @@
           objective("Change in the girls' restroom", { map: "school", x: 24, y: 6 });
         } },
         lunch,
-        { at: H(15), run: async () => { await say("phone", "Riyansh: park after school? zach's coming. keshav has a NEW frisbee"); objective("Meet everyone at the park", { npc: "riyansh" }); } }],
+        { at: H(15), run: async () => { await say("phone", "Riyansh: park after school? zach's coming. keshav has a NEW frisbee"); objective("Meet everyone at Maple Park, across the road from school (until 6:00 PM)", { npc: "riyansh" }); } }],
       async afterBath() { const g = G(); if (g.time > H(10, 40) && g.worn && !g.d.changed) { g.d.changed = true; objective("Back to your seat", { map: "school", x: 6, y: 3 }); } },
       talk: {
         mom: async () => {

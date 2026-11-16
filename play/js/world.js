@@ -72,6 +72,7 @@
     objs(o, "bath", [[11, 2], [12, 2]], { home: true }); objs(o, "fridge", [[18, 2]]); objs(o, "kitchen", span(15, 2, 3));
     objs(o, "table", span(16, 4, 2, 2));
     MAPS.home = { id: "home", name: "Home", floor: ".", t: g, objects: o,
+      bathAreas: [{ x: 11, y: 2, w: 3, h: 4, home: true }],
       warps: [{ x: 8, y: 8, to: "town", tx: 5, ty: 5, dir: "down" }] };
   }
 
@@ -93,14 +94,19 @@
     R(g, 13, 6, 1, 2, "z"); R(g, 14, 6, 1, 2, "z"); R(g, 30, 6, 2, 2, "z");
     for (const x of [9, 19, 34]) S(g, x, 5, "l");
     for (const x of [4, 24, 40]) S(g, x, 8, "l");
-    for (const [x, y] of [[2, 10], [6, 12], [11, 10], [15, 13], [31, 10], [36, 12], [41, 10], [17, 9]]) S(g, x, y, "T");
+    for (const [x, y] of [[2, 10], [6, 12], [11, 10], [36, 12], [41, 10], [14, 13], [34, 13]]) S(g, x, y, "T");
+    R(g, 3, 11, 2, 1, "f"); R(g, 8, 10, 3, 1, "f"); R(g, 38, 9, 2, 1, "f");
+    // Maple Park: fenced, with a gate and sign off the sidewalk, a path, benches and a pond.
+    R(g, 16, 9, 17, 1, "F"); R(g, 16, 10, 1, 4, "F"); R(g, 32, 10, 1, 4, "F");
+    R(g, 18, 9, 2, 1, "p"); S(g, 20, 9, "J");
+    R(g, 18, 10, 2, 3, "p"); R(g, 17, 13, 15, 1, "p");
     R(g, 22, 10, 6, 3, "w");
-    R(g, 19, 10, 2, 1, "h"); R(g, 29, 12, 2, 1, "h");
-    R(g, 3, 11, 2, 1, "f"); R(g, 8, 10, 3, 1, "f"); R(g, 33, 11, 2, 2, "f"); R(g, 38, 9, 2, 1, "f");
-    R(g, 12, 12, 1, 2, "F"); R(g, 13, 12, 2, 1, "F");
-    objs(o, "bench", span(19, 10, 2)); objs(o, "bench", span(29, 12, 2)); objs(o, "pond", span(22, 10, 6, 3));
+    R(g, 20, 10, 2, 1, "h"); R(g, 29, 12, 2, 1, "h");
+    S(g, 17, 10, "T"); S(g, 31, 10, "T"); R(g, 28, 10, 2, 1, "f"); S(g, 17, 12, "f"); R(g, 20, 12, 2, 1, "f");
+    objs(o, "bench", span(20, 10, 2)); objs(o, "bench", span(29, 12, 2)); objs(o, "pond", span(22, 10, 6, 3)); objs(o, "parksign", [[20, 9]]);
     MAPS.town = { id: "town", name: "Maple Street", floor: "g", outdoor: true, t: g, objects: o,
-      labels: { "5,4": "Home: pack + sleep", "14,4": "Corner Mart: buy supplies", "26,4": "School: health class", "38,4": "Pool: swim practice" },
+      labels: { "5,4": "Home: pack + sleep", "14,4": "Corner Mart: buy supplies", "26,4": "School: health class", "38,4": "Pool: swim practice", "19,9": "Maple Park" },
+      bathAreas: [],
       warps: [
         { x: 5, y: 4, to: "home", tx: 8, ty: 7, dir: "up" },
         { x: 14, y: 4, to: "mart", tx: 7, ty: 9, dir: "up" },
@@ -134,6 +140,7 @@
     objs(o, "locker", [...span(1, 7, 4), ...span(8, 7, 8), ...span(19, 7, 4), ...span(26, 7, 3)]);
     objs(o, "notice", [[10, 6]]); objs(o, "trophy", span(20, 11, 2));
     MAPS.school = { id: "school", name: "Lincoln Middle School", floor: ",", t: g, objects: o,
+      bathAreas: [{ x: 21, y: 2, w: 8, h: 5 }],
       areas: [{ name: "Room 104", x: 1, y: 2, w: 12, h: 4 }, { name: "Dr. Flo's Office", x: 14, y: 2, w: 6, h: 4 }, { name: "Girls' Restroom", x: 21, y: 2, w: 8, h: 4 }],
       warps: [{ x: 14, y: 12, to: "town", tx: 26, ty: 5, dir: "down" }, { x: 15, y: 12, to: "town", tx: 26, ty: 5, dir: "down" }] };
   }
@@ -150,6 +157,7 @@
     objs(o, "shelf", span(2, 6, 5), "snacks"); objs(o, "shelf", span(9, 6, 3), "drinks");
     objs(o, "bath", [[1, 9], [2, 9]]);
     MAPS.mart = { id: "mart", name: "Corner Mart", floor: ",", t: g, objects: o,
+      bathAreas: [{ x: 1, y: 8, w: 2, h: 1 }],
       warps: [{ x: 7, y: 10, to: "town", tx: 14, ty: 5, dir: "down" }] };
   }
 
@@ -165,10 +173,11 @@
     objs(o, "bath", [[18, 2], [18, 4]]); objs(o, "locker", span(16, 2, 2)); objs(o, "bench", span(3, 10, 3));
     objs(o, "pool", span(3, 4, 11, 5));
     MAPS.pool = { id: "pool", name: "Community Pool", floor: ":", t: g, objects: o,
+      bathAreas: [{ x: 15, y: 2, w: 4, h: 3 }],
       warps: [{ x: 9, y: 11, to: "town", tx: 38, ty: 5, dir: "down" }] };
   }
 
   for (const id in MAPS) { const m = MAPS[id]; m.h = m.t.length; m.w = m.t[0].length; }
   window.MAPS = MAPS;
-  window.SOLID = new Set("#=IjbdyotxXknmqLSCGTRUYOHABZvwhlFa".split(""));
+  window.SOLID = new Set("#=IjbdyotxXknmqLSCGTRUYOHABZvwhlFaJ".split(""));
 })();

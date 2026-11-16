@@ -131,3 +131,20 @@ The last seven rows are not CDC or ACOG. They were added in a second pass, for t
 ## Not sourced: game mechanics
 
 These are invented numbers for gameplay, not health claims: how fast each product fills up, the 6-hour wait between pain relievers, how much each stat changes, and the 28-day calendar.
+
+## Period history (Grandma Okafor)
+
+Added 2026-11-16. Grandma Okafor in the park tells six pieces of period history, one each time you talk to her. They are saved in the Fact Book under "History".
+
+Source: Popular Science, "How WWI and WWII revolutionized period products" — https://www.popsci.com/health/period-product-history/
+
+| Claim in the game | What the source says |
+|---|---|
+| Before store-bought pads, most people used washable cloth rags | "For Europeans and American settlers, the most common solution was washable rags." |
+| WWI nurses noticed cellulose bandages absorbed blood, which led to Kotex | Nurses "realized that cellulose bandages were also effective at soaking up other kinds of blood," inspiring "the first commercially successful period pads—Kotex" |
+| Pads were held by a sanitary belt; adhesive pads arrived in 1969 | Sanitary belts "were commonplace between the mid-1800s and 1970s"; "Stayfree introduced the first adhesive pads in 1969" |
+| Applicator tampons were patented in 1931 and became Tampax | Patented in 1931 with "a disposable cardboard applicator," later "built ... into the renowned Tampax brand" |
+| Leona Chalmers patented a rubber menstrual cup in 1937 | Four years after 1933, "actress and entrepreneur Leona Chalmers patented the first menstrual cup, made from rubber" |
+| A brand printed coupons so buyers didn't have to ask out loud; pads were wrapped in newspaper | Modess "introduced magazine coupons that could be pushed across the counter without asking for menstrual pads out loud. The product would be handed over wrapped in newspaper." |
+
+The exact year Kotex went on sale differs between sources (1918 to 1921), so the game doesn't give one. Only one source was read for these history claims; a museum source would make them stronger.

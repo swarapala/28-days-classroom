@@ -264,7 +264,12 @@
     g.r(3, 3, 10, 10, P.metal); g.r(4, 4, 8, 6, P.lgray); g.r(6, 6, 4, 2, P.water2); g.r(4, 12, 8, 3, P.dgray);
   });
 
-  const OVER = new Set("bdyotxknmqTChlFaG".split(""));
+  def("J", 1, (g) => { // park sign on two posts
+    g.r(3, 9, 2, 6, P.wood3); g.r(11, 9, 2, 6, P.wood3);
+    g.r(1, 2, 14, 8, P.wood2); g.r(1, 2, 14, 1, P.wood1); g.r(1, 9, 14, 1, P.wood3);
+    g.r(3, 4, 10, 1, P.cream); g.r(4, 6, 8, 1, P.cream); g.p(13, 3, P.leaf3); g.p(12, 3, P.leaf2);
+  });
+  const OVER = new Set("bdyotxknmqTChlFaGJ".split(""));
   const cache = {};
   function tileCanvas(key, v) {
     const id = key + "|" + v;

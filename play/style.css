@@ -349,3 +349,15 @@ kbd {
 #screen.title .tmenu .opt { padding: calc(var(--u) * 0.5) 0; }
 #screen.title .tfoot { position: static; margin-top: calc(var(--u) * 5); font-size: calc(var(--u) * 6); line-height: 1.35; max-width: calc(var(--u) * 290); }
 #ui:has(#screen.title) #labels { display: none; }
+
+/* ---------- roomier stats box, with names and numbers ---------- */
+#stats { width: calc(var(--u) * 96); padding: calc(var(--u) * 3) calc(var(--u) * 4); }
+#stats .srow { height: calc(var(--u) * 10); gap: calc(var(--u) * 3); }
+#stats .slbl { width: calc(var(--u) * 24); font-size: calc(var(--u) * 6.3); color: var(--dim); flex: none; }
+#stats .sval { width: calc(var(--u) * 10); text-align: right; font-size: calc(var(--u) * 6.5); flex: none; }
+#stats .srow.prot, #stats .srow.money { height: calc(var(--u) * 11); }
+/* goal box sits between the stats box and the clock, with the next timed thing under it */
+#objective { left: calc(var(--u) * 106); right: calc(var(--u) * 92); transform: none; max-width: none; }
+#objective .next { margin-top: calc(var(--u) * 1); font-size: calc(var(--u) * 6.3); color: var(--dim); }
+#objective .next b { color: var(--cream); }
+#objective .tkey { display: inline-block; margin-left: calc(var(--u) * 2); padding: 0 calc(var(--u) * 2); border-radius: calc(var(--u) * 1); background: #3a3150; color: var(--cream); }

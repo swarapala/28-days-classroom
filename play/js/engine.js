@@ -201,7 +201,24 @@
     if (who !== "npc" && npcAt(x, y)) return false;
     if (who === "npc" && ((G.x === x && G.y === y) || (RT.mv && RT.mv.tx === x && RT.mv.ty === y))) return false;
     if (who === "npc" && (ch === "D" || RT.npcs.some((n) => n.map === m.id && n.x === x && n.y === y))) return false;
+    if (who === "npc" && npcAvoid(m, x, y)) return false;
     return true;
+  }
+  // Tiles NPCs never walk onto: next to a door, or in a one-tile-wide gap (doorways between rooms).
+  function npcAvoid(m, x, y) {
+    if ((m.warps || []).some((w) => Math.abs(w.x - x) + Math.abs(w.y - y) <= 1)) return true;
+    const solid = (a, b) => { const c = tileAt(m, a, b); return c === null || SOLID.has(c); };
+    return (solid(x - 1, y) && solid(x + 1, y)) || (solid(x, y - 1) && solid(x, y + 1));
+  }
+  // If the player keeps walking into someone, they step out of the way.
+  function nudgeNPC(nx, ny) {
+    const n = npcAt(nx, ny); if (!n || n.mv) return;
+    if ((RT.bump = (RT.bump && RT.bump.n === n ? { n, t: RT.bump.t } : { n, t: RT.t })) && RT.t - RT.bump.t < 0.35) return;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const ax = n.x + dx, ay = n.y + dy;
+      if ((ax === G.x && ay === G.y) || !walkable(ax, ay, "npc")) continue;
+      n.mv = { tx: ax, ty: ay, t: 0, fx: n.x, fy: n.y }; n.hx = ax; n.hy = ay; RT.bump = null; return;
+    }
   }
   function teleport(mapId, x, y, dir) {
     const changed = mapId !== G.mapId;
@@ -265,6 +282,7 @@
     if (k === "p" || k === "P") return "phone";
     if (k === "m" || k === "M") return "mute";
     if (k === "h" || k === "H") return "help";
+    if (k === "t" || k === "T") return "wait";
     if (k === "f" || k === "F") return "fact";
     if (k >= "1" && k <= "9") return "n" + k;
     return null;
@@ -281,6 +299,7 @@
     if (k === "ok") interact();
     if (k === "bag") run(openBag);
     if (k === "phone") run(openPhone);
+    if (k === "wait") run(waitAhead);
     if (k === "help") run(showHelp);
   });
   addEventListener("keyup", (e) => { const k = keyName(e); RT.held = RT.held.filter((h) => h !== k); });
@@ -301,7 +320,10 @@
       });
     }
     const o = RT.map.objects.find((o) => o.x === tx && o.y === ty);
-    if (o) run(() => useObject(o));
+    if (o) return run(() => useObject(o));
+    // Anywhere inside a bathroom works, not only facing the toilet or sink.
+    const ba = (RT.map.bathAreas || []).find((a) => G.x >= a.x && G.x < a.x + a.w && G.y >= a.y && G.y < a.y + a.h);
+    if (ba) run(() => openBath(!!ba.home));
   }
 
   // ---------- movement ----------
@@ -320,7 +342,8 @@
     if (!d) return;
     G.dir = d;
     const [dx, dy] = DIRS[d], nx = G.x + dx, ny = G.y + dy;
-    if (walkable(nx, ny)) RT.mv = { tx: nx, ty: ny, t: 0, fx: G.x, fy: G.y };
+    if (walkable(nx, ny)) { RT.mv = { tx: nx, ty: ny, t: 0, fx: G.x, fy: G.y }; RT.bump = null; }
+    else nudgeNPC(nx, ny);
   }
   function arrived() {
     const w = (RT.map.warps || []).find((w) => w.x === G.x && w.y === G.y);
@@ -352,7 +375,7 @@
       case "bed": {
         const ok = C.canSleep ? C.canSleep() : G.time >= 1080;
         if (!ok) return say("narr", `Not tired yet. ${G.objective ? "Still to do: " + G.objective : ""}`);
-        const c = await ask("narr", "Go to sleep and end the day?", ["Sleep", "Not yet"]);
+        const c = await ask("narr", G.trackerUnlocked ? "Log your day in the cycle tracker, then go to sleep?" : "Go to sleep and end the day?", G.trackerUnlocked ? ["Log my day, then sleep", "Not yet"] : ["Sleep", "Not yet"]);
         if (c === 0) await endDay();
         return;
       }
@@ -398,6 +421,7 @@
       case "shelf": return openShop(o.data);
       case "bench": await say("narr", "You sit for a minute and people-watch."); await skip(10); stat("energy", 3); stat("mood", 2); return;
       case "pond": return say("narr", "Two ducks are ignoring each other in the pond.");
+      case "parksign": return say("narr", "MAPLE PARK. Open dawn to dusk. Ducks have the right of way.");
       case "pool": return say("narr", "The water smells like chlorine. Talk to Coach Reed about practice.");
     }
   }
@@ -556,11 +580,16 @@
         if (have("underwear", home) && !G.d.usedUW) r.push({ act: "wear", id: "underwear", icon: "underwear", label: "Put on period underwear" });
         if (G.worn) r.push({ act: "off", icon: ITEMS[G.worn.id].icon, label: `Take off the ${ITEMS[G.worn.id].name.toLowerCase()}` });
         if (G.stained && bagCount("pants")) r.push({ act: "pants", icon: "pants", label: "Change into spare pants" });
+        if (!r.some((x) => x.act === "wear" || x.act === "cup")) {
+          const atHome = ["pad", "liner", "tampon", "cup", "underwear"].some((id) => stashCount(id) > 0);
+          r.push({ act: "none", icon: "drop", disabled: true, label: home ? "No period products at home" : atHome ? "Your products are at home, not in your bag" : "No period products in your bag",
+            hint: home ? "Buy some at Corner Mart." : G.mapId === "school" ? "Try the pad dispenser on the restroom wall (25 cents), or ask Dr. Flo. Next time, pack some at your desk." : "Next time, pack some at your desk before you leave home. Corner Mart sells them." });
+        }
         r.push({ act: "leave", label: "Leave" });
         return r;
       },
-      detail: (r) => r.id ? `<b>${ITEMS[r.id].name}</b><br>${ITEMS[r.id].desc}` : r.act === "pants" ? "Swap into your spare pants. Stain solved." : r.act === "cup" ? "Empty, rinse in the sink, reinsert. Good for another 12 hours." : "",
-      onPick: (r) => { result = r; return true; }
+      detail: (r) => r.hint ? r.hint : r.id ? `<b>${ITEMS[r.id].name}</b><br>${ITEMS[r.id].desc}` : r.act === "pants" ? "Swap into your spare pants. Stain solved." : r.act === "cup" ? "Empty, rinse in the sink, reinsert. Good for another 12 hours." : "",
+      onPick: (r) => { if (r.disabled) return; result = r; return true; }
     });
     G.d.inBath = false;
     if (!result || result.act === "leave") return;
@@ -609,15 +638,17 @@
         rows: () => [
           { k: "tracker", icon: "phone", label: "Cycle Tracker", disabled: !G.trackerUnlocked },
           { k: "facts", icon: "bulb", label: "Fact Book", right: `${factCount()[0]} / ${ft}` },
+          { k: "plan", icon: "book", label: "Today's plan", disabled: !C.plan },
           { k: "glossary", icon: "book", label: "Glossary", right: `${GLOSSARY.length} words` },
           { k: "close", label: "Put phone away" }
         ],
-        detail: (r) => r.k === "tracker" ? (G.trackerUnlocked ? "Your logs and the forecast for your next period." : "Not installed yet. You'll get it on Day 1.") : r.k === "facts" ? "Every 'Did you know?' you've found so far. Find them by doing things: changing, shopping, swimming, snacking..." : r.k === "glossary" ? "What the words from health class mean, plus a labeled body diagram." : "",
+        detail: (r) => r.k === "tracker" ? (G.trackerUnlocked ? "Your logs and the forecast for your next period." : "Not installed yet. You'll get it on Day 1.") : r.k === "facts" ? "Every 'Did you know?' you've found so far. Find them by doing things: changing, shopping, swimming, snacking..." : r.k === "glossary" ? "What the words from health class mean, plus a labeled body diagram." : r.k === "plan" ? "What's happening today, and when." : "",
         onPick: (r) => r.k
       });
       if (pick === "tracker") await openTracker();
       else if (pick === "facts") await openFactBook();
       else if (pick === "glossary") await openGlossary();
+      else if (pick === "plan") await showPlan(false);
       else return;
     }
   }
@@ -678,10 +709,35 @@
     if (entry.correct) { G.literacy += 10; sfx.chime(); await say("narr", "Logged. That matches your day. **+10 Body Literacy**"); }
     else await say("narr", `Logged. Hmm, looking back, today was closer to **${[].concat(t.flow).join(" / ")}** flow with cramps around **${t.cramps}/10**. Close enough is fine. The point is noticing.`);
   }
+  function planTime(t) { return t === null ? "Evening" : fmtTime(t); }
+  async function showPlan(first) {
+    if (!C.plan) return;
+    await card({ icon: "book", title: first ? `Today's plan: ${C.sub || "Day " + G.day}` : "Today's plan", cls: "lesson", btn: first ? "Let's go" : "Close",
+      body: `<table class="keys">${C.plan.map(([t, x]) => `<tr><td>${planTime(t)}</td><td>${x}</td></tr>`).join("")}</table>
+        <p class="dim">Your phone (P) shows this plan any time. In free time, press <b>T</b> to skip ahead to the next thing on it.</p>` });
+  }
+  function nextPlan() {
+    if (!C || !C.plan) return null;
+    return C.plan.find(([t]) => t !== null && t > G.time) || null;
+  }
+  // T: skip free time until the next thing on today's plan.
+  async function waitAhead() {
+    const n = nextPlan();
+    let until, what;
+    if (n) { until = n[0]; what = n[1]; }
+    else if (G.time < 1080) { until = 1080; what = "the evening"; }
+    else return say("narr", "Nothing else is planned today. When you're ready, go to bed to log your day and sleep.");
+    if (until - G.time < 5) return say("narr", `It's almost time: ${what}`);
+    const f = flowNow();
+    const warn = f !== "none" && (!G.worn || G.worn.left < (ITEMS[G.worn.id].cap * 0.4)) ? " Careful: your period product may not last that long." : "";
+    const c = await ask("narr", `Skip ahead to ${fmtTime(until)}? Next: ${what}.${warn}`, ["Skip ahead", "Stay here"]);
+    if (c !== 0) return;
+    await skip(until - G.time, "LATER...", `Skipping to ${fmtTime(until)}`);
+  }
   async function showHelp() {
     await card({ icon: "bag", title: "How to play", body: `<table class="keys">
       <tr><td>Arrows / WASD</td><td>Walk</td></tr><tr><td>Space / E</td><td>Talk, use, confirm</td></tr>
-      <tr><td>I</td><td>Backpack (eat, take medicine)</td></tr><tr><td>P</td><td>Phone: cycle tracker, Fact Book</td></tr>
+      <tr><td>T</td><td>Skip ahead to the next thing on today's plan</td></tr><tr><td>I</td><td>Backpack (eat, take medicine)</td></tr><tr><td>P</td><td>Phone: cycle tracker, Fact Book</td></tr>
       <tr><td>B</td><td>Back / close (Esc works too)</td></tr><tr><td>M</td><td>Sound on/off (starts off)</td></tr></table>
       <p class="dim">Watch the drop meter at top-left when you're on your period. When it empties, you leak. Change in any bathroom.</p>` });
   }
@@ -710,6 +766,7 @@
     await UI.dayCard(C);
     if (G.nightLeak && f0 !== "none") { G.nightLeak = false; await say("you", "Ugh. I leaked overnight. Pajamas AND sheets.", "sad"); await say("narr", "It happens to almost everyone. Overnight pads or period underwear help. Change in the closet, and put on fresh protection in the bathroom."); fact("overnight"); }
     G.nightLeak = false;
+    if (C.plan) await showPlan(true);
     if (C.onStart) await C.onStart();
   }
   async function endDay() {
@@ -798,6 +855,8 @@
       ents.push({ y: cam.py, draw: () => drawChar("ruby", Math.round(cam.px - cam.cx), Math.round(cam.py - cam.cy) - 3, G.dir, fr, G.stained) });
     }
     if (G.target && G.target.map === m.id && G.target.x !== undefined) ents.push({ y: G.target.y * T, draw: () => marker(G.target.x * T - cam.cx, G.target.y * T - cam.cy) });
+    const door = targetDoor();
+    if (door) ents.push({ y: door.y * T, draw: () => marker(door.x * T - cam.cx, door.y * T - cam.cy) });
     ents.sort((a, b) => a.y - b.y).forEach((e) => e.draw());
     for (const p of RT.parts) {
       ctx.fillStyle = `rgba(230,220,200,${p.life * 1.6})`;
@@ -806,6 +865,17 @@
     }
     lighting(m, cam);
     positionLabels(cam);
+  }
+  // When today's goal is somewhere else, point at the door that leads toward it.
+  function targetDoor() {
+    const t = G.target; if (!t || !RT.map) return null;
+    let dest = null;
+    if (t.npc) { const n = RT.npcs.find((n) => n.id === t.npc); if (!n || !n.map || n.map === G.mapId) return null; dest = n.map; }
+    else if (t.map && t.map !== G.mapId) dest = t.map;
+    if (!dest) return null;
+    const ws = RT.map.warps || [];
+    const w = G.mapId === "town" ? ws.find((w) => w.to === dest) : ws.find((w) => w.to === "town");
+    return w ? { x: w.x, y: w.y } : null;
   }
   function marker(x, y) {
     const b = Math.round(Math.sin(RT.t * 6) * 1.5);
@@ -885,7 +955,8 @@
     const sig = [Math.round(st.health), Math.round(st.energy), Math.round(st.mood), Math.round(st.cravings), G.money, f, G.worn && G.worn.id, G.worn && Math.round(G.worn.left * 20), G.stained, Math.round(ce), G.day, G.cycleStarted, Math.floor(G.time / 5), G.objective, G.overflow > 0].join("|");
     if (sig === hudSig) return;
     hudSig = sig;
-    const bar = (k, icon, col) => `<div class="srow"><img class="ic" src="${ART.icon(icon)}"><div class="bar"><span style="width:${st[k]}%;background:${col}"></span></div></div>`;
+    const LBL = { health: "Health", energy: "Energy", mood: "Mood", cravings: "Cravings" };
+    const bar = (k, icon, col) => `<div class="srow"><img class="ic" src="${ART.icon(icon)}"><span class="slbl">${LBL[k]}</span><div class="bar"><span style="width:${st[k]}%;background:${col}"></span></div><span class="sval">${Math.round(st[k])}</span></div>`;
     let prot = "";
     if (f !== "none" || G.worn) {
       if (G.worn) {
@@ -899,8 +970,10 @@
       `<div class="srow money"><img class="ic" src="${ART.icon("coin")}">$${G.money.toFixed(2)}</div>` + prot + cr + stn;
     const ph = G.cycleStarted ? PHASE[phaseOf(G.day)] : null;
     $("clock").innerHTML = wheelSVG() + `<div class="ctext"><b>${G.cycleStarted ? "DAY " + G.day : "DAY ?"}</b><span style="color:${ph ? ph.color : "#9a97a6"}">${ph ? ph.label : "no period yet"}</span><span>${fmtTime(G.time)}</span></div>`;
-    $("objective").innerHTML = G.objective ? `<span class="arrow">▸</span>${G.objective}` : "";
-    $("objective").style.display = G.objective ? "" : "none";
+    const np = nextPlan();
+    $("objective").innerHTML = (G.objective ? `<span class="arrow">▸</span>${G.objective}` : "") +
+      (np ? `<div class="next">Next: <b>${fmtTime(np[0])}</b> ${np[1]} <span class="tkey">T skip</span></div>` : "");
+    $("objective").style.display = G.objective || np ? "" : "none";
   }
 
   // ---------- UI: dialogue, menus, cards ----------
@@ -910,7 +983,7 @@
     patel: { name: "Mr. Patel", look: "patel" }, dee: { name: "Dee", look: "dee" }, lin: { name: "Pharmacist Lin", look: "lin" },
     coach: { name: "Coach Reed", look: "coach" }, estrogen: { name: "Estrogen", look: "estrogen" }, progesterone: { name: "Progesterone", look: "progesterone" },
     lh: { name: "LH", look: "lh" }, fsh: { name: "FSH", look: "fsh" }, narr: { name: "", look: null }, phone: { name: "Phone", icon: "phone" },
-    t1: { name: "Neighbor", look: "t1" }, t2: { name: "Neighbor", look: "t2" }, t3: { name: "Mrs. Okafor", look: "t3" }, t4: { name: "Jogger", look: "t4" }
+    t1: { name: "Neighbor", look: "t1" }, t2: { name: "Neighbor", look: "t2" }, t3: { name: "Grandma Okafor", look: "t3" }, t4: { name: "Jogger", look: "t4" }
   };
   const PITCH = { you: 560, mom: 470, riyansh: 400, keshav: 430, zach: 380, nurse: 500, patel: 340, dee: 450, lin: 480, coach: 360, estrogen: 820, progesterone: 620, lh: 900, fsh: 700, narr: 300 };
   function markup(t) {
@@ -936,7 +1009,10 @@
     active() { return !!(this.dlg || this.menuState || this.cardState || this.dayCardState); },
     key(k) {
       if (this.dayCardState) { if (k === "ok") this.dayCardState(); return; }
-      if (this.cardState) { if (k === "ok" || k === "back") this.cardState(); return; }
+      if (this.cardState) {
+        if (k === "up" || k === "down") { const c = document.querySelector("#modal .card, #screen .endp"); if (c) c.scrollBy({ top: (k === "down" ? 1 : -1) * c.clientHeight * 0.4, behavior: "smooth" }); return; }
+        if (k === "ok" || k === "back") this.cardState(); return;
+      }
       if (this.menuState) return this.menuKey(k);
       if (this.dlg) return this.dlgKey(k);
     },
@@ -1205,7 +1281,7 @@
       el.innerHTML = `<div class="logo"><span>28</span> DAYS</div>
         <div class="tag">a month in your body <span class="edition">Classroom Edition</span></div>
         <div class="tmenu">${opts.map((o, i) => `<div class="opt ${i === sel ? "sel" : ""}" data-i="${i}"><span class="cur">▸</span>${o[1]}</div>`).join("")}</div>
-        <div class="tfoot">Arrows/WASD move · Space talk · B back · I bag · P phone · H help · M sound (starts off)<br><span class="dim">A health class game about the menstrual cycle. Not medical advice: talk to a trusted adult, school nurse or doctor about your own body.</span></div>`;
+        <div class="tfoot">Arrows/WASD move · Space talk · B back · T skip ahead · I bag · P phone · H help · M sound (starts off)<br><span class="dim">A health class game about the menstrual cycle. Not medical advice: talk to a trusted adult, school nurse or doctor about your own body.</span></div>`;
       el.querySelectorAll(".opt").forEach((o) => (o.onclick = () => { sel = +o.dataset.i; choose(); }));
     };
     const keys = (k) => {
