@@ -1,0 +1,2 @@
+Jersey 15 font, from Google Fonts (https://fonts.google.com/specimen/Jersey+15).
+Licensed under the SIL Open Font License, Version 1.1: https://openfontlicense.org

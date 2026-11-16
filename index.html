@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>28 Days: Classroom Edition</title>
+  <meta name="description" content="A free game that teaches the menstrual cycle to middle school health classes. Includes a printable teacher guide, answer key and student worksheet." />
+  <link rel="preload" href="play/fonts/Jersey15.woff2" as="font" type="font/woff2" crossorigin />
+  <style>
+    @font-face { font-family: "Jersey 15"; src: url("play/fonts/Jersey15.woff2") format("woff2"); font-display: swap; }
+    :root { --ink: #1d1828; --panel: #251f33; --cream: #f3e9d2; --dim: #b3acc2; --hl: #f2c14e; --rose: #e36b7b; --line: #4a4064; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--ink); color: var(--cream); font: 17px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    a { color: var(--hl); }
+    .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
+    h1, h2, h3, .btn, .kicker, nav a, .edition { font-family: "Jersey 15", "Courier New", monospace; font-weight: 400; letter-spacing: 0.03em; }
+
+    nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; flex-wrap: wrap; }
+    nav .brand { font-size: 1.7rem; color: var(--cream); text-decoration: none; }
+    nav .brand span, h1 span { color: var(--rose); }
+    nav .links { display: flex; gap: 18px; flex-wrap: wrap; }
+    nav .links a { color: var(--cream); text-decoration: none; font-size: 1.25rem; }
+    nav .links a:hover { color: var(--hl); }
+
+    header { padding: 24px 0 44px; text-align: center; }
+    h1 { font-size: clamp(3.2rem, 11vw, 6.4rem); line-height: 1; margin: 0; text-shadow: 0 4px 0 #0f0c16, 4px 8px 0 #3a3150; }
+    .edition { display: inline-block; margin-top: 12px; font-size: 1.5rem; background: var(--hl); color: var(--ink); padding: 0 14px 2px; border-radius: 6px; }
+    .tagline { font-size: clamp(1.1rem, 2.6vw, 1.35rem); max-width: 660px; margin: 18px auto 26px; }
+    .buttons { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-block; font-size: 1.6rem; padding: 8px 26px 10px; border-radius: 8px; text-decoration: none; color: var(--ink); background: var(--hl); box-shadow: 0 0 0 3px var(--ink), 0 0 0 5px var(--hl), 0 9px 0 rgba(0,0,0,.35); }
+    .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn.alt { background: var(--panel); color: var(--cream); box-shadow: 0 0 0 3px var(--ink), 0 0 0 5px var(--cream), 0 9px 0 rgba(0,0,0,.35); }
+    .note { color: var(--dim); font-size: 0.92rem; margin-top: 16px; }
+
+    .preview { margin: 36px auto 0; max-width: 860px; border-radius: 10px; overflow: hidden; background: #0f0c16; box-shadow: 0 0 0 3px var(--cream), 0 0 0 6px var(--ink), 0 18px 40px rgba(0,0,0,.5); }
+    .preview .frame { position: relative; aspect-ratio: 5 / 3; }
+    .preview iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; pointer-events: none; }
+    .preview .cap { font-size: 0.9rem; color: var(--dim); padding: 8px 12px; text-align: center; border-top: 1px solid var(--line); }
+
+    section { padding: 56px 0; border-top: 1px solid var(--line); }
+    .kicker { color: var(--hl); font-size: 1.2rem; letter-spacing: 0.14em; margin: 0 0 4px; }
+    h2 { font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; margin: 0 0 14px; }
+    h3 { font-size: 1.55rem; margin: 0 0 4px; color: var(--hl); }
+    p { margin: 10px 0; }
+    .lead { max-width: 720px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 22px; }
+    .card { background: var(--panel); border: 2px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+    .card p { margin: 4px 0 0; color: #ddd5e8; font-size: 0.97rem; }
+    .two { display: grid; grid-template-columns: 1.1fr 1fr; gap: 28px; align-items: start; }
+    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+    ul.check { list-style: none; padding: 0; margin: 12px 0; }
+    ul.check li { padding-left: 26px; position: relative; margin: 7px 0; }
+    ul.check li::before { content: ""; position: absolute; left: 2px; top: 0.55em; width: 10px; height: 10px; background: var(--hl); box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--hl); }
+    .wrapt { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; margin-top: 14px; font-size: 0.97rem; }
+    th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+    th { color: var(--hl); font-family: "Jersey 15", monospace; font-weight: 400; font-size: 1.15rem; letter-spacing: 0.04em; }
+    .box { background: var(--panel); border-left: 5px solid var(--hl); padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 18px; }
+    footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--dim); font-size: 0.92rem; }
+    footer a { color: var(--dim); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="#top"><span>28</span> DAYS</a>
+      <div class="links">
+        <a href="#learn">What students learn</a><a href="#class">In your class</a><a href="#facts">The facts</a><a href="#about">About</a>
+      </div>
+    </nav>
+
+    <header id="top">
+      <h1><span>28</span> DAYS</h1>
+      <div class="edition">Classroom Edition</div>
+      <p class="tagline">A free game that teaches the menstrual cycle to middle school health classes. Students play through a first period and the month after it, with a lesson and a quiz every school day.</p>
+      <div class="buttons">
+        <a class="btn" href="play/">Play the game</a>
+        <a class="btn alt" href="teacher-guide.html">Teacher guide</a>
+      </div>
+      <p class="note">Runs in a web browser. Nothing to install, no accounts, no student information collected. Needs a keyboard.</p>
+
+      <div class="preview">
+        <div class="frame"><iframe id="demo" title="A self-playing preview of the game" loading="lazy" src="play/index.html?demo&auto"></iframe></div>
+        <div class="cap">A self-playing preview of the game, about two minutes long.</div>
+      </div>
+    </header>
+
+    <section id="learn">
+      <p class="kicker">WHAT STUDENTS LEARN</p>
+      <h2>The whole cycle, by living through one</h2>
+      <p class="lead">Students play Ruby, a middle schooler whose first period starts in the middle of health class. They pack her bag, sit through Dr. Flo's lessons, deal with leaks and cramps, and log each day in a cycle tracker. Three boys in the story ask questions and learn alongside her, so it works for the whole class.</p>
+      <div class="grid">
+        <div class="card"><h3>What a period is</h3><p>Why it happens, how long it lasts, and what counts as normal.</p></div>
+        <div class="card"><h3>The four phases</h3><p>Menstrual, follicular, ovulation and luteal, and the hormone behind each.</p></div>
+        <div class="card"><h3>Products</h3><p>Pads, liners, tampons, cups and period underwear, and how often to change each.</p></div>
+        <div class="card"><h3>Cramps and PMS</h3><p>What causes them and what helps.</p></div>
+        <div class="card"><h3>Tracking</h3><p>How logging a cycle helps you predict the next period.</p></div>
+        <div class="card"><h3>When to get help</h3><p>The signs that mean it's time to talk to a doctor, and who a trusted adult is.</p></div>
+      </div>
+    </section>
+
+    <section id="class">
+      <p class="kicker">IN YOUR CLASS</p>
+      <h2>Built to fit a class period</h2>
+      <div class="two">
+        <div>
+          <p>The game is split into eight in-game days. "Choose a day" on the title screen starts a class on any of them, with supplies already stocked.</p>
+          <ul class="check">
+            <li>A printable teacher guide with pacing plans</li>
+            <li>A discussion question for every day</li>
+            <li>An answer key for all 23 quiz questions</li>
+            <li>A one-page student worksheet with answers</li>
+            <li>A glossary with a labeled body diagram</li>
+            <li>Sound starts off</li>
+          </ul>
+          <div class="buttons" style="justify-content:flex-start;margin-top:20px">
+            <a class="btn" href="teacher-guide.html">Open the teacher guide</a>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <h3>What it covers</h3>
+            <p>The biology of the menstrual cycle, period products and hygiene, cramps, PMS, mood changes, cycle tracking, and when to see a doctor.</p>
+            <h3 style="margin-top:14px">What it doesn't</h3>
+            <p>Sexual activity, contraception, or pregnancy. Pregnancy is mentioned only to explain why the lining of the uterus builds up each cycle.</p>
+          </div>
+          <div class="box">Please have a school nurse or health teacher review it before using it with students. It has not yet been reviewed by a medical professional.</div>
+        </div>
+      </div>
+      <div class="wrapt"><table>
+        <tr><th>If you have</th><th>Play</th></tr>
+        <tr><td>One class period</td><td>Day 1, then the discussion question and the worksheet</td></tr>
+        <tr><td>Three class periods</td><td>Days 1 and 2, then Days 5, 9 and 14, then Days 21, 26 and the final day with the unit test</td></tr>
+        <tr><td>A full unit</td><td>One or two days per period, with discussion after each</td></tr>
+      </table></div>
+    </section>
+
+    <section id="facts">
+      <p class="kicker">THE FACTS</p>
+      <h2>Every fact shows where it came from</h2>
+      <p class="lead">The game has 31 "Did you know?" facts, five health lessons and a 28-word glossary. Each was checked against pages from the CDC, the American College of Obstetricians and Gynecologists (ACOG), the NIH and a few others. Where sources disagree, the game uses ACOG's number.</p>
+      <p class="lead">The full list of claims and sources is public: <a href="SOURCES.md">read the fact check</a>.</p>
+      <p class="lead"><strong>Privacy.</strong> No names, no logins, no cookies. Progress is saved only in the browser on that computer. The site counts visits anonymously so its author can see how often it is used.</p>
+      <p class="lead">28 Days is not medical advice. Students with questions about their own bodies should talk to a parent or guardian, a school nurse, or a doctor.</p>
+    </section>
+
+    <section id="about">
+      <p class="kicker">ABOUT</p>
+      <h2>Made by a student, for students</h2>
+      <p class="lead">28 Days was created by Swara Palanivel, a high school student, and first presented at the High School I/O 2026 hackathon. It was built with Claude Code, an AI coding assistant.</p>
+      <p class="lead">Using it in your class, or have feedback? Email <a href="mailto:swarapala@gmail.com">swarapala@gmail.com</a>. Corrections from nurses and health teachers are especially welcome.</p>
+    </section>
+
+    <footer>
+      <p>28 Days: Classroom Edition is free to use in classrooms. It is not medical advice.</p>
+      <p><a href="play/">Play</a> · <a href="teacher-guide.html">Teacher guide</a> · <a href="SOURCES.md">Sources</a></p>
+    </footer>
+  </div>
+
+  <script src="play/js/count.js"></script>
+  <script>
+    // The preview is the game's own self-playing tour. Restart it when it finishes.
+    setInterval(function () { var f = document.getElementById("demo"); if (f) f.src = f.src; }, 140000);
+  </script>
+</body>
+</html>

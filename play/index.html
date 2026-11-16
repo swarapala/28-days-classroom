@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>28 Days: Classroom Edition</title>
+  <link rel="preload" href="fonts/Jersey15.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="stylesheet" href="style.css?v=c1" />
+</head>
+<body>
+  <div id="game">
+    <canvas id="view" width="320" height="192"></canvas>
+    <div id="ui">
+      <div id="labels"></div>
+      <div id="floats"></div>
+      <div id="hud" class="hidden">
+        <div id="stats" class="panel"></div>
+        <div id="objective"></div>
+        <div id="clock" class="panel"></div>
+      </div>
+      <div id="fact" class="panel hidden">
+        <img class="ic" id="fact-icon" alt="" />
+        <div class="fbody"><div class="fhead">DID YOU KNOW?</div><div id="fact-text"></div></div>
+        <div class="fkey">F</div>
+      </div>
+      <div id="toasts"></div>
+      <div id="banner"></div>
+      <div id="dialog" class="hidden">
+        <div class="portrait"><img id="dlg-portrait" alt="" /></div>
+        <div class="box panel">
+          <div id="dlg-name"></div>
+          <div id="dlg-text"></div>
+          <div id="dlg-next">▼</div>
+        </div>
+      </div>
+      <div id="choices" class="panel hidden"></div>
+      <div id="modal" class="hidden"></div>
+      <div id="fade"></div>
+      <div id="screen" class="hidden"></div>
+    </div>
+  </div>
+
+  <!-- Plain scripts, no build step: double-click index.html to play. -->
+  <script src="js/count.js?v=c1"></script>
+  <script src="js/art.js?v=c1"></script>
+  <script src="js/world.js?v=c1"></script>
+  <script src="js/engine.js?v=c1"></script>
+  <script src="js/story.js?v=c1"></script>
+  <script src="js/demo.js"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>28 Days: Teacher Guide</title>
+<style>
+  :root { --ink: #231c2e; --muted: #6a6278; --line: #d9d3e2; --accent: #b23a55; --soft: #f7f3ee; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.55 Georgia, "Times New Roman", serif; color: var(--ink); background: #fff; }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1, h2, h3, th, .label, button, nav { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  h1 { font-size: 2rem; margin: 0 0 4px; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); margin: 0 0 20px; }
+  h2 { font-size: 1.3rem; margin: 44px 0 10px; padding-top: 14px; border-top: 2px solid var(--ink); }
+  h3 { font-size: 1.02rem; margin: 22px 0 6px; }
+  p { margin: 8px 0; }
+  ul, ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  a { color: var(--accent); }
+  .box { background: var(--soft); border-left: 4px solid var(--accent); padding: 12px 16px; margin: 16px 0; }
+  .box p:first-child { margin-top: 0; } .box p:last-child { margin-bottom: 0; }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.93rem; margin: 10px 0; }
+  th, td { text-align: left; vertical-align: top; padding: 7px 9px; border-bottom: 1px solid var(--line); }
+  th { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 2px solid var(--ink); }
+  .right { color: #1f7a46; font-weight: 700; }
+  .src { color: var(--muted); font-size: 0.85rem; white-space: nowrap; }
+  nav { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.9rem; margin: 14px 0 6px; }
+  button { font-size: 0.95rem; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--ink); background: var(--ink); color: #fff; cursor: pointer; }
+  .q { margin: 14px 0 4px; font-weight: 700; font-family: system-ui, sans-serif; font-size: 0.95rem; }
+  .diagram-wrap { max-width: 460px; margin: 6px auto; color: var(--ink); }
+  .diagram-wrap svg { width: 100%; height: auto; display: block; }
+  .phase { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 6px 0; }
+  .phase svg { width: 120px; height: 120px; }
+  .line { border-bottom: 1px solid var(--ink); height: 26px; margin: 4px 0; }
+  .blank { display: inline-block; border-bottom: 1px solid var(--ink); min-width: 150px; height: 1.1em; vertical-align: bottom; }
+  .worksheet { border: 1px solid var(--line); padding: 20px 22px; margin-top: 12px; }
+  .worksheet h3 { margin-top: 18px; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 26px; }
+  @media (max-width: 600px) { .two { grid-template-columns: 1fr; } }
+  @media print {
+    nav, .noprint { display: none !important; }
+    main { max-width: none; padding: 0; }
+    h2 { break-after: avoid; }
+    tr, .worksheet h3 { break-inside: avoid; }
+    .pagebreak { break-before: page; }
+    .worksheet { border: 0; padding: 0; }
+    body { font-size: 11.5pt; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1><span>28</span> Days: Teacher Guide</h1>
+  <p class="sub">Classroom Edition. A game about the menstrual cycle for middle school health classes.</p>
+  <p class="noprint"><button onclick="window.print()">Print this guide</button> &nbsp; <a href="play/">Open the game</a> &nbsp; <a href="./">Home</a></p>
+  <nav>
+    <a href="#about">About</a><a href="#before">Before you teach</a><a href="#run">Running it</a><a href="#days">Day by day</a>
+    <a href="#key">Answer key</a><a href="#facts">Facts</a><a href="#glossary">Glossary</a><a href="#worksheet">Worksheet</a><a href="#sources">Sources</a>
+  </nav>
+
+  <h2 id="about">What this is</h2>
+  <p>In 28 Days, students play Ruby, a middle schooler who gets her first period in the middle of health class. They guide her through one full cycle: packing a bag at home, going to health class, handling leaks and cramps, buying supplies, and logging each day in a cycle tracker. Health class in the game has a short lesson and a quiz every school day, and a unit test at the end.</p>
+  <p>The story includes three boys, Ruby's friends, who ask questions and learn alongside her. It is written for the whole class.</p>
+
+  <div class="box">
+    <p><strong>Please review it before you use it.</strong> This game was made by students, with help from an AI coding assistant. Its health facts were checked against pages from the CDC, ACOG and NIH, but it has not been reviewed by a medical professional or a curriculum specialist. Have your school nurse or health teacher play it first.</p>
+  </div>
+
+  <h3>What students will learn</h3>
+  <ul>
+    <li>What a period is, and why it happens.</li>
+    <li>The four phases of the menstrual cycle, and the hormone most linked to each.</li>
+    <li>The main period products, how they differ, and how often each should be changed.</li>
+    <li>Ways to manage cramps and PMS.</li>
+    <li>Why tracking a cycle is useful.</li>
+    <li>Signs that mean it's time to talk to a doctor.</li>
+    <li>Who their trusted adults are, and how to support a friend.</li>
+  </ul>
+  <p>These fit the usual health education skill areas: understanding health concepts, finding valid information, communicating, making decisions, and practicing healthy behaviors. Check them against your own state and district standards.</p>
+
+  <h3>What it covers, and what it doesn't</h3>
+  <p><strong>Covers:</strong> the biology of the menstrual cycle, period products and hygiene, cramps, PMS, mood changes, cycle tracking, and when to see a doctor.</p>
+  <p><strong>Does not cover:</strong> sexual activity, contraception, or pregnancy. Pregnancy is mentioned only to explain why the lining of the uterus builds up each cycle.</p>
+  <p>It uses the correct names for body parts (uterus, ovaries, cervix, vagina), as health textbooks do.</p>
+
+  <h2 id="before">Before you teach</h2>
+  <ul>
+    <li><strong>Family notification.</strong> Many districts require notice to families, or an opt-out, for puberty education. Follow your district's policy.</li>
+    <li><strong>What you need.</strong> A computer with a keyboard and a web browser for each student or pair. It does not work on phones or tablets without a keyboard. Nothing to install, and no accounts.</li>
+    <li><strong>Privacy.</strong> No names, no logins, no cookies, and no personal information. Progress is saved only in the browser on that computer. The site counts visits anonymously with GoatCounter, a privacy-focused counter, so its author can see how many times it has been used. If your network blocks that, the game works the same. Everything else, including the font, is in the game's own folder.</li>
+    <li><strong>Sound.</strong> It starts with sound off. Pressing M turns the beeps on.</li>
+    <li><strong>Shared computers.</strong> "Continue" on the title screen picks up whatever game was last saved in that browser. Students can use "Start the story" or "Choose a day" to begin fresh.</li>
+    <li><strong>Simplifications.</strong> The game uses a 28-day cycle with four tidy phases. Real cycles vary, and for teens anything from 21 to 45 days is normal. The numbers inside the game, like how fast a pad fills, were invented for gameplay.</li>
+  </ul>
+
+  <h3>Controls</h3>
+  <div class="wrap"><table>
+    <tr><th>Key</th><th>What it does</th></tr>
+    <tr><td>Arrow keys or WASD</td><td>Walk</td></tr>
+    <tr><td>Space</td><td>Talk, use, confirm</td></tr>
+    <tr><td>B</td><td>Back, or close a menu</td></tr>
+    <tr><td>I</td><td>Backpack: eat a snack, use a heat patch</td></tr>
+    <tr><td>P</td><td>Phone: cycle tracker, Fact Book, glossary with a body diagram</td></tr>
+    <tr><td>H</td><td>Help</td></tr>
+  </table></div>
+
+  <h2 id="run">Running it in class</h2>
+  <p>Each in-game day is a separate chunk. "Choose a day" on the title screen lets a class start on any day, with Ruby's supplies already stocked. A day takes roughly 10 to 15 minutes, so play one yourself first to judge the timing for your class.</p>
+  <div class="wrap"><table>
+    <tr><th>If you have</th><th>Play</th><th>Then</th></tr>
+    <tr><td>One class period</td><td>Day 1</td><td>Discuss the Day 1 question as a class. Use the worksheet as an exit ticket.</td></tr>
+    <tr><td>Three class periods</td><td>Period 1: Days 1 and 2<br>Period 2: Days 5, 9 and 14<br>Period 3: Days 21, 26 and the final day</td><td>One discussion question per period. The final day includes the unit test.</td></tr>
+    <tr><td>A full unit (5 to 6 periods)</td><td>One or two days per period</td><td>Discussion after each day, the worksheet midway, and the in-game unit test as the assessment.</td></tr>
+  </table></div>
+
+  <h3>What students see each day</h3>
+  <ol>
+    <li><strong>Home.</strong> Pack a bag that holds only six things.</li>
+    <li><strong>School.</strong> Health class with Dr. Flo: a short lesson, then a three-question quiz with feedback on every answer.</li>
+    <li><strong>The rest of the day.</strong> Leaks, cramps, friends, the store, swim practice. "Did you know?" cards appear when something related happens.</li>
+    <li><strong>Bedtime.</strong> Log the day in the cycle tracker. Then a recap card lists what was learned and asks one "Think about it" question.</li>
+  </ol>
+
+  <h3>Setting a comfortable tone</h3>
+  <ul>
+    <li>Agree on ground rules first: no teasing, correct words for body parts, and no personal questions about classmates.</li>
+    <li>Offer an anonymous question box. Dr. Flo uses one in the game, which makes it an easy idea to borrow.</li>
+    <li>Leaks happen in the game on purpose. The characters respond kindly, which gives you a model to point to.</li>
+    <li>Some students will already have periods and some won't. No one should be asked to share their own experience.</li>
+  </ul>
+
+  <h2 id="days">Day by day</h2>
+  <p>The key points are what the recap card shows students at the end of each day.</p>
+  <div class="wrap"><table id="days-table"></table></div>
+
+  <h2 id="key">Quiz answer key</h2>
+  <p>The correct answer is marked. Students see the explanation after each question.</p>
+  <div id="answer-key"></div>
+
+  <h2 id="facts">The "Did you know?" facts</h2>
+  <p>Each fact appears once, as a full-screen card, when a student does something related. Students can reread the ones they've found in the phone's Fact Book.</p>
+  <div class="wrap"><table id="facts-table"></table></div>
+
+  <h3>When to talk to a doctor</h3>
+  <p>This list is on a poster in Dr. Flo's office and in the Unit 5 lesson.</p>
+  <ul id="signs"></ul>
+
+  <h2 id="glossary">Glossary</h2>
+  <p>Students can open this on Ruby's phone at any time.</p>
+  <div class="diagram-wrap" id="diagram-labeled"></div>
+  <div class="wrap"><table id="glossary-table"></table></div>
+
+  <h2 id="worksheet" class="pagebreak">Student worksheet</h2>
+  <p class="noprint">Print this section for students. The answers are below it.</p>
+  <div class="worksheet">
+    <p><strong>28 Days</strong> &nbsp; Name: <span class="blank"></span> &nbsp; Date: <span class="blank" style="min-width:90px"></span></p>
+
+    <h3>A. Label the diagram</h3>
+    <p>Write the number next to each word: &nbsp; ovary <span class="blank" style="min-width:30px"></span> &nbsp; fallopian tube <span class="blank" style="min-width:30px"></span> &nbsp; uterus <span class="blank" style="min-width:30px"></span> &nbsp; lining of the uterus <span class="blank" style="min-width:30px"></span> &nbsp; cervix <span class="blank" style="min-width:30px"></span> &nbsp; vagina <span class="blank" style="min-width:30px"></span></p>
+    <div class="diagram-wrap" id="diagram-numbered"></div>
+
+    <h3>B. Match each phase to what happens</h3>
+    <div class="two">
+      <div>
+        <p>____ Menstrual phase</p><p>____ Follicular phase</p><p>____ Ovulation</p><p>____ Luteal phase</p>
+      </div>
+      <div>
+        <p>a. An ovary releases an egg.</p><p>b. The lining of the uterus sheds. This is the period.</p><p>c. Progesterone rises and helps prepare the lining.</p><p>d. Estrogen rises, and the lining grows and thickens.</p>
+      </div>
+    </div>
+
+    <h3>C. True or false</h3>
+    <p>____ 1. A normal period lasts 2 to 7 days.</p>
+    <p>____ 2. Day 1 of the cycle is the last day of bleeding.</p>
+    <p>____ 3. A tampon can safely be worn for 12 hours.</p>
+    <p>____ 4. Teen cycles are often irregular in the first few years.</p>
+    <p>____ 5. Used pads should be flushed down the toilet.</p>
+    <p>____ 6. Needing to change a pad every 1 to 2 hours is a reason to see a doctor.</p>
+
+    <h3>D. Short answers</h3>
+    <p>1. Name two things that can help with cramps.</p><div class="line"></div><div class="line"></div>
+    <p>2. Why is it useful to track your cycle?</p><div class="line"></div><div class="line"></div>
+    <p>3. Name two signs that mean someone should talk to a doctor about their period.</p><div class="line"></div><div class="line"></div>
+
+    <h3>E. My trusted adults</h3>
+    <p>Write the names of two adults you could talk to if you had a question about your body.</p><div class="line"></div><div class="line"></div>
+  </div>
+
+  <h3 class="pagebreak">Worksheet answers</h3>
+  <ul>
+    <li><strong>A.</strong> Ovary 1, fallopian tube 2, uterus 3, lining of the uterus 4, cervix 5, vagina 6.</li>
+    <li><strong>B.</strong> Menstrual b, follicular d, ovulation a, luteal c.</li>
+    <li><strong>C.</strong> 1 true. 2 false: it is the first day of bleeding. 3 false: never longer than 8 hours. 4 true. 5 false: wrap them and put them in the trash. 6 true.</li>
+    <li><strong>D.</strong> 1: any two of heat, exercise, enough sleep, or a pain reliever with a parent's okay. 2: to notice your pattern, predict your next period, and have real information if something changes. 3: any two from the "When to talk to a doctor" list above.</li>
+    <li><strong>E.</strong> Answers will vary. Don't collect or read these aloud.</li>
+  </ul>
+
+  <h2 id="sources">Sources</h2>
+  <p>Every fact, lesson and glossary entry was checked against the pages below. The file <a href="SOURCES.md">SOURCES.md</a> lists each claim, its source, and where sources disagree.</p>
+  <ul>
+    <li><a href="https://www.cdc.gov/female-blood-disorders/about/heavy-menstrual-bleeding.html">CDC: About Heavy Menstrual Bleeding</a></li>
+    <li><a href="https://www.cdc.gov/hygiene/about/menstrual-hygiene.html">CDC: Healthy Habits: Menstrual Hygiene</a></li>
+    <li><a href="https://www.acog.org/womens-health/faqs/your-first-period">ACOG: Your First Period</a></li>
+    <li><a href="https://www.acog.org/womens-health/faqs/heavy-and-abnormal-periods">ACOG: Heavy and Abnormal Periods</a></li>
+    <li><a href="https://www.acog.org/womens-health/faqs/dysmenorrhea-painful-periods">ACOG: Dysmenorrhea: Painful Periods</a></li>
+    <li><a href="https://www.acog.org/womens-health/faqs/premenstrual-syndrome">ACOG: Premenstrual Syndrome (PMS)</a></li>
+    <li><a href="https://womenshealth.gov/menstrual-cycle/your-menstrual-cycle">HHS Office on Women's Health: Your menstrual cycle</a></li>
+    <li><a href="https://www.ncbi.nlm.nih.gov/books/NBK500020/">NIH StatPearls: Physiology, Menstrual Cycle</a></li>
+    <li><a href="https://my.clevelandclinic.org/health/articles/10132-menstrual-cycle">Cleveland Clinic: Menstrual Cycle</a></li>
+  </ul>
+  <p>This game is not medical advice. Students with questions about their own bodies should talk to a parent or guardian, the school nurse, or a doctor.</p>
+</main>
+
+<!-- The guide reads its answer key, facts and glossary straight from the game's own data file,
+     so it can never drift out of date. The stubs below stand in for the game engine. -->
+<script>
+  window.getG = () => ({ flags: {}, d: {}, stats: {}, stash: {}, bag: [] });
+  const PH = { menstrual: ["Menstrual", "#d9505f", 1, 5], follicular: ["Follicular", "#e9a04f", 6, 13], ovulation: ["Ovulation", "#4fae84", 14, 14], luteal: ["Luteal", "#7b7fd4", 15, 28] };
+  window.phaseDiagram = function () {
+    const pt = (r, a) => (50 + r * Math.cos(a)).toFixed(1) + "," + (50 + r * Math.sin(a)).toFixed(1);
+    let s = "";
+    for (const k in PH) {
+      const [, col, d0, d1] = PH[k], a0 = ((d0 - 1) / 28) * Math.PI * 2 - Math.PI / 2, a1 = (d1 / 28) * Math.PI * 2 - Math.PI / 2, big = a1 - a0 > Math.PI ? 1 : 0;
+      s += `<path d="M${pt(26, a0)} L${pt(44, a0)} A44,44 0 ${big} 1 ${pt(44, a1)} L${pt(26, a1)} A26,26 0 ${big} 0 ${pt(26, a0)}Z" fill="${col}" stroke="#231c2e" stroke-width="1.5"/>`;
+    }
+    return `<div class="phase"><svg viewBox="0 0 100 100">${s}</svg><div>${Object.values(PH).map(([n, c, a, z]) => `<div><span style="display:inline-block;width:12px;height:12px;background:${c};margin-right:8px"></span><strong>${n}</strong> day${a === z ? " " + a : "s " + a + " to " + z}</div>`).join("")}</div></div>`;
+  };
+</script>
+<script src="play/js/count.js?v=2"></script>
+<script src="play/js/story.js?v=s4"></script>
+<script>
+  const esc = (t) => String(t).replace(/\*\*/g, "");
+  const phaseOf = (d) => d <= 5 ? "Menstrual" : d <= 13 ? "Follicular" : d === 14 ? "Ovulation" : "Luteal";
+  const STORY = [
+    "Mom's period kit. Ruby's first period starts in the middle of health class.",
+    "A heavy day with cramps. Swim practice, where pads don't work.",
+    "A Saturday at the park. The period is nearly over.",
+    "After the period: more energy, and Science Olympiad tryouts.",
+    "A Saturday debate tournament, and a twinge at ovulation.",
+    "Tired and snacky. Helping out at the store after school.",
+    "PMS: cravings, a short temper, and a friend who forgot to save a seat.",
+    "The next period arrives. The tracker predicted it. Unit test."
+  ];
+  // day-by-day table
+  document.getElementById("days-table").innerHTML = "<tr><th>Day</th><th>Story</th><th>Health lesson</th><th>Key points</th><th>Think about it</th></tr>" +
+    CHAPTERS.map((c, i) => `<tr><td><strong>Day ${c.day}${i === CHAPTERS.length - 1 ? " again" : ""}</strong><br><span class="src">${phaseOf(c.day)}</span></td><td>${STORY[i]}</td><td>${c.health ? c.health.title : "No class (weekend)"}</td><td><ul>${(c.recap || []).map((x) => `<li>${x}</li>`).join("")}</ul></td><td>${c.think || ""}</td></tr>`).join("");
+  // answer key
+  document.getElementById("answer-key").innerHTML = Object.values(HEALTH).map((u) => `<h3>${u.title}</h3>` + u.quiz.map((q, n) =>
+    `<p class="q">${u.final ? "" : (n + 1) + ". "}${q.q}</p><ul>${q.a.map((a, j) => `<li${j === q.c ? ' class="right"' : ""}>${"ABCD"[j]}. ${a}${j === q.c ? " ✓" : ""}</li>`).join("")}</ul><p><em>${q.why}</em></p>`).join("")).join("");
+  // facts
+  document.getElementById("facts-table").innerHTML = "<tr><th>Title</th><th>Fact</th><th>Source</th></tr>" +
+    Object.values(FACTS).map((f) => `<tr><td><strong>${f.t}</strong></td><td>${f.x}</td><td class="src">${f.s || ""}</td></tr>`).join("");
+  document.getElementById("signs").innerHTML = WARNING_SIGNS.map((s) => `<li>${s}</li>`).join("");
+  // glossary + diagrams
+  document.getElementById("glossary-table").innerHTML = "<tr><th>Word</th><th>Meaning</th><th>Source</th></tr>" +
+    GLOSSARY.map((g) => `<tr><td><strong>${g.t}</strong></td><td>${g.d}</td><td class="src">${g.s || ""}</td></tr>`).join("");
+  document.getElementById("diagram-labeled").innerHTML = bodyDiagram(true);
+  const NUM = { "Ovary": 1, "Fallopian tube": 2, "Uterus": 3, "Lining of the uterus": 4, "Cervix": 5, "Vagina": 6 };
+  let numbered = bodyDiagram(true);
+  for (const k in NUM) numbered = numbered.split(">" + k + "<").join(' font-weight="700">' + NUM[k] + "<");
+  document.getElementById("diagram-numbered").innerHTML = numbered;
+</script>
+</body>
+</html>
