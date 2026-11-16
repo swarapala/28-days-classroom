@@ -2,9 +2,9 @@
 
 A free game that teaches the menstrual cycle to middle school health classes.
 
-- **Website:** https://swarapala.github.io/28-days-classroom/
-- **Play:** https://swarapala.github.io/28-days-classroom/play/
-- **Teacher guide:** https://swarapala.github.io/28-days-classroom/teacher-guide.html
+- **Website:** https://learn28days.org/
+- **Play:** https://learn28days.org/play/
+- **Teacher guide:** https://learn28days.org/teacher-guide.html
 
 Students play Ruby through her first period and the month after it. Every school day has a health lesson and a quiz, and the last day has a unit test. The teacher guide includes pacing plans, discussion questions, an answer key and a student worksheet.
 
