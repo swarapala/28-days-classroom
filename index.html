@@ -77,6 +77,8 @@
     .box { background: var(--panel); border-left: 5px solid var(--hl); padding: 14px 18px; border-radius: 0 10px 10px 0; margin-top: 18px; }
     footer { border-top: 1px solid var(--line); padding: 28px 0 48px; color: var(--dim); font-size: 0.92rem; }
     footer a { color: var(--dim); }
+      ol.steps { margin: 8px 0 0; padding-left: 22px; } ol.steps li { margin: 6px 0; color: #ddd5e8; }
+    #start .card h3 { margin: 0 0 2px; }
   </style>
 </head>
 <body>
@@ -84,7 +86,7 @@
     <nav>
       <a class="brand" href="#top"><span>28</span> DAYS</a>
       <div class="links">
-        <a href="#learn">What students learn</a><a href="#class">In your class</a><a href="#facts">The facts</a><a href="#about">About</a>
+        <a href="#start">Get started</a><a href="#learn">What students learn</a><a href="#class">In your class</a><a href="#facts">The facts</a><a href="#about">About</a>
       </div>
     </nav>
 
@@ -103,6 +105,29 @@
         <div class="cap">A self-playing preview of the game, about two minutes long.</div>
       </div>
     </header>
+
+    <section id="start">
+      <p class="kicker">GET STARTED</p>
+      <h2>Three steps, either way</h2>
+      <div class="two">
+        <div class="card">
+          <h3>Teachers</h3>
+          <ol class="steps">
+            <li>Play Day 1 yourself. It takes about 10 to 15 minutes.</li>
+            <li>Read the <a href="teacher-guide.html#quickstart">5-minute quick start</a> in the teacher guide.</li>
+            <li>Send students to <strong>learn28days.org</strong>.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3>Students</h3>
+          <ol class="steps">
+            <li>Press <a href="play/">Play the game</a>.</li>
+            <li>Choose <strong>Start the story</strong>, or the day your teacher gives you.</li>
+            <li>Follow the goal at the top of the screen and the yellow arrow.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
 
     <section id="learn">
       <p class="kicker">WHAT STUDENTS LEARN</p>
