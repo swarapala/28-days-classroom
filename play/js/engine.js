@@ -9,8 +9,9 @@
   let S = 3;
 
   function resize() {
-    const s = Math.min(innerWidth / VW, (innerHeight - 4) / VH);
-    S = s >= 3 ? Math.floor(s) : Math.max(1, Math.floor(s * 4) / 4);
+    const portraitTouch = document.body.classList.contains("touch") && innerHeight > innerWidth;
+    const s = Math.min(innerWidth / VW, (innerHeight - 4 - (portraitTouch ? 230 : 0)) / VH);
+    S = s >= 3 ? Math.floor(s) : Math.max(0.5, Math.floor(s * 20) / 20);
     $("game").style.width = VW * S + "px";
     $("game").style.height = VH * S + "px";
     document.documentElement.style.setProperty("--s", S);
@@ -338,16 +339,77 @@
       return;
     }
     if (RT.busy || UI.active() || RT.queue.length) return;
-    const d = RT.held[RT.held.length - 1];
+    let d = RT.held[RT.held.length - 1];
+    if (d) RT.auto = null;                       // pressing a key cancels a tap-to-walk
+    else if (RT.auto) return autoStep();
     if (!d) return;
     G.dir = d;
     const [dx, dy] = DIRS[d], nx = G.x + dx, ny = G.y + dy;
     if (walkable(nx, ny)) { RT.mv = { tx: nx, ty: ny, t: 0, fx: G.x, fy: G.y }; RT.bump = null; }
     else nudgeNPC(nx, ny);
   }
+  // ---------- tap / click to walk ----------
+  // Breadth-first search over walkable tiles. goal(x, y) says whether a tile is a place to stop.
+  function findPath(goal) {
+    const m = RT.map, key = (x, y) => x + "," + y, prev = { [key(G.x, G.y)]: null }, q = [[G.x, G.y]];
+    while (q.length) {
+      const [x, y] = q.shift();
+      if (goal(x, y)) { const out = []; let k = key(x, y); while (prev[k]) { out.unshift(prev[k][2]); k = key(prev[k][0], prev[k][1]); } return out; }
+      for (const d in DIRS) {
+        const nx = x + DIRS[d][0], ny = y + DIRS[d][1], k = key(nx, ny);
+        if (k in prev || nx < 0 || ny < 0 || nx >= m.w || ny >= m.h || !walkable(nx, ny)) continue;
+        if (tileAt(m, nx, ny) === "D" && !goal(nx, ny)) continue;   // don't walk through doors on the way
+        prev[k] = [x, y, d]; q.push([nx, ny]);
+        if (q.length > 4000) return null;
+      }
+    }
+    return null;
+  }
+  function tapAt(clientX, clientY) {
+    if (RT.mode !== "play" || RT.busy || UI.active() || !RT.cam) return;
+    const r = cv.getBoundingClientRect();
+    const tx = Math.floor(((clientX - r.left) / S + RT.cam.cx) / T), ty = Math.floor(((clientY - r.top) / S + RT.cam.cy + 3) / T);
+    const m = RT.map;
+    if (tx < 0 || ty < 0 || tx >= m.w || ty >= m.h || (tx === G.x && ty === G.y)) return;
+    const npc = npcAt(tx, ty), obj = m.objects.find((o) => o.x === tx && o.y === ty);
+    const ch = tileAt(m, tx, ty);
+    if (npc || obj || SOLID.has(ch)) {
+      if (!npc && !obj) return;
+      // Walk next to it (or across a shop counter from it), then face it and use it.
+      const spots = [];
+      for (const d in DIRS) {
+        const [dx, dy] = DIRS[d];
+        spots.push([tx - dx, ty - dy, d]);
+        const mid = tileAt(m, tx - dx, ty - dy);
+        if (npc && mid && "CG".includes(mid)) spots.push([tx - 2 * dx, ty - 2 * dy, d]);
+      }
+      const facing = (x, y) => { const s = spots.find((s) => s[0] === x && s[1] === y); return s && s[2]; };
+      const path = facing(G.x, G.y) ? [] : findPath((x, y) => !!facing(x, y) && tileAt(m, x, y) !== "D");
+      if (!path) return;
+      RT.auto = { path, goal: [tx, ty], then: () => { const end = [G.x, G.y], dir = facing(end[0], end[1]); if (dir) { G.dir = dir; interact(); } } };
+    } else {
+      const path = findPath((x, y) => x === tx && y === ty);
+      if (!path) return;
+      RT.auto = { path, goal: [tx, ty] };
+    }
+    RT.tapMark = { x: tx, y: ty, t: RT.t };
+  }
+  function autoStep() {
+    const a = RT.auto;
+    if (!a.path.length) { RT.auto = null; if (a.then) a.then(); return; }
+    const d = a.path[0], [dx, dy] = DIRS[d], nx = G.x + dx, ny = G.y + dy;
+    G.dir = d;
+    if (!walkable(nx, ny)) {                     // someone stepped in the way: try a new route once
+      if (a.retried) { RT.auto = null; return; }
+      a.retried = true; nudgeNPC(nx, ny);
+      return;
+    }
+    a.path.shift();
+    RT.mv = { tx: nx, ty: ny, t: 0, fx: G.x, fy: G.y };
+  }
   function arrived() {
     const w = (RT.map.warps || []).find((w) => w.x === G.x && w.y === G.y);
-    if (w) return run(() => doWarp(w));
+    if (w) { RT.auto = null; return run(() => doWarp(w)); }
     for (const tr of C.triggers || []) {
       if (tr.done || tr.map !== G.mapId) continue;
       if (G.x < tr.x || G.x >= tr.x + (tr.w || 1) || G.y < tr.y || G.y >= tr.y + (tr.h || 1)) continue;
@@ -737,7 +799,7 @@
   async function showHelp() {
     await card({ icon: "bag", title: "How to play", body: `<table class="keys">
       <tr><td>Arrows / WASD</td><td>Walk</td></tr><tr><td>Space / E</td><td>Talk, use, confirm</td></tr>
-      <tr><td>T</td><td>Skip ahead to the next thing on today's plan</td></tr><tr><td>I</td><td>Backpack (eat, take medicine)</td></tr><tr><td>P</td><td>Phone: cycle tracker, Fact Book</td></tr>
+      <tr><td>Tap / click</td><td>Walk there, or talk to / use what you tapped</td></tr><tr><td>T</td><td>Skip ahead to the next thing on today's plan</td></tr><tr><td>I</td><td>Backpack (eat, take medicine)</td></tr><tr><td>P</td><td>Phone: cycle tracker, Fact Book</td></tr>
       <tr><td>B</td><td>Back / close (Esc works too)</td></tr><tr><td>M</td><td>Sound on/off (starts off)</td></tr></table>
       <p class="dim">Watch the drop meter at top-left when you're on your period. When it empties, you leak. Change in any bathroom.</p>` });
   }
@@ -838,6 +900,7 @@
     ctx.fillStyle = "#1d1828"; ctx.fillRect(0, 0, VW, VH);
     if (!m) return;
     const cam = RT.mode === "title" ? { cx: Math.round(RT.titleCam), cy: 0, px: 0, py: 0 } : camera();
+    RT.cam = cam;
     drawMap(m, cam.cx, cam.cy);
     const ents = [];
     for (const n of RT.npcs) {
@@ -855,6 +918,10 @@
       ents.push({ y: cam.py, draw: () => drawChar("ruby", Math.round(cam.px - cam.cx), Math.round(cam.py - cam.cy) - 3, G.dir, fr, G.stained) });
     }
     if (G.target && G.target.map === m.id && G.target.x !== undefined) ents.push({ y: G.target.y * T, draw: () => marker(G.target.x * T - cam.cx, G.target.y * T - cam.cy) });
+    if (RT.tapMark && RT.t - RT.tapMark.t < 0.6 && RT.auto) {
+      const k = RT.tapMark, a = 1 - (RT.t - k.t) / 0.6;
+      ents.push({ y: k.y * T - 1, draw: () => { ctx.strokeStyle = `rgba(242,193,78,${a})`; ctx.lineWidth = 1; ctx.strokeRect(k.x * T - cam.cx + 2.5, k.y * T - cam.cy + 2.5, 11, 11); } });
+    }
     const door = targetDoor();
     if (door) ents.push({ y: door.y * T, draw: () => marker(door.x * T - cam.cx, door.y * T - cam.cy) });
     ents.sort((a, b) => a.y - b.y).forEach((e) => e.draw());
@@ -1108,7 +1175,7 @@
         ${m.cancel === false ? "" : `<div class="mback" id="mback"><kbd>B</kbd>Back</div>`}
         <div class="mtitle">${m.title}</div>${m.sub ? `<div class="msub">${m.sub()}</div>` : ""}
         <div class="mbody"><div class="mlist">${rows.map((x, i) => `<div class="row ${i === m.sel ? "sel" : ""} ${x.disabled ? "dis" : ""}" data-i="${i}">
-          <span class="cur">▸</span>${x.icon ? `<img class="ic" src="${ART.icon(x.icon)}">` : `<span class="icgap"></span>`}<span class="lbl">${x.label}</span>${x.right ? `<span class="rt">${x.right}</span>` : ""}</div>`).join("")}</div>
+          <span class="cur">▸</span>${x.icon ? `<img class="ic" src="${ART.icon(x.icon)}">` : `<span class="icgap"></span>`}<span class="lbl">${x.label}</span>${x.right ? (m.onLeft && !x.done && !x.disabled ? `<span class="rt"><span class="arr" data-a="left">◂</span>${String(x.right).replace(/^◂ | ▸$/g, "")}<span class="arr" data-a="right">▸</span></span>` : `<span class="rt">${x.right}</span>`) : ""}</div>`).join("")}</div>
         ${m.detail ? `<div class="mdetail">${m.detail(r) || ""}</div>` : ""}</div>
         ${m.footer ? `<div class="mfoot">${m.footer()}</div>` : ""}
         <div class="mhint"><kbd>↑</kbd><kbd>↓</kbd>choose <kbd>Space</kbd>select${m.onLeft ? " <kbd>←</kbd><kbd>→</kbd>change" : ""}${m.cancel === false ? "" : " <kbd>B</kbd>back"}</div></div>`;
@@ -1116,7 +1183,7 @@
       const selEl = $("modal").querySelector(".row.sel");
       if (selEl) selEl.scrollIntoView({ block: "nearest" });
       $("modal").querySelectorAll(".row").forEach((el) => {
-        el.onclick = () => { m.sel = +el.dataset.i; this.menuKey("ok"); };
+        el.onclick = (e) => { m.sel = +el.dataset.i; const a = e.target.closest(".arr"); this.menuKey(a ? a.dataset.a : "ok"); };
         el.onmousemove = (e) => { if (!mouseMoved(e)) return; if (m.sel !== +el.dataset.i) { m.sel = +el.dataset.i; this.drawMenu(); } };
       });
     },
@@ -1288,7 +1355,7 @@
       el.innerHTML = `<div class="logo"><span>28</span> DAYS</div>
         <div class="tag">a month in your body <span class="edition">Classroom Edition</span></div>
         <div class="tmenu">${opts.map((o, i) => `<div class="opt ${i === sel ? "sel" : ""}" data-i="${i}"><span class="cur">▸</span>${o[1]}</div>`).join("")}</div>
-        <div class="tfoot">Arrows/WASD move · Space talk · B back · T skip ahead · I bag · P phone · H help · M sound (starts off)<br><span class="dim">A health class game about the menstrual cycle. Not medical advice: talk to a trusted adult, school nurse or doctor about your own body.</span></div>`;
+        <div class="tfoot">Arrows/WASD or tap to move · Space talk · B back · T skip · I bag · P phone · H help · M sound<br><span class="dim">A health class game about the menstrual cycle. Not medical advice: talk to a trusted adult, school nurse or doctor about your own body.</span></div>`;
       el.querySelectorAll(".opt").forEach((o) => (o.onclick = () => { sel = +o.dataset.i; choose(); }));
     };
     const keys = (k) => {
@@ -1363,5 +1430,36 @@
   // debugging handle (used for testing; harmless in play)
   window.__dbg = { RT, chapter: () => C, startChapter, endDay, tick, useObject, setG: (g) => (G = g), quiz, trackerLog, dream, ending, updateNPCs };
 
-  window.addEventListener("load", () => { resize(); titleScreen(); requestAnimationFrame(frame); });
+  // ---------- mouse and touch ----------
+  // Tap or click the world to walk there (or to talk to / use what you tapped).
+  // On touch screens, a d-pad and buttons appear; every screen gets clickable Bag / Phone / Skip / Help buttons.
+  const TOUCH = /[?&]touch\b/.test(location.search) || (matchMedia("(pointer: coarse)").matches && navigator.maxTouchPoints > 0);
+  function sendKey(key, down) { window.dispatchEvent(new KeyboardEvent(down ? "keydown" : "keyup", { key })); }
+  function setupPointer() {
+    $("ui").addEventListener("click", (e) => {
+      if (e.target.closest("#dialog, #choices, #modal, #screen, #touch, #actbar, #labels a")) return;
+      tapAt(e.clientX, e.clientY);
+    });
+    $("dialog").addEventListener("click", (e) => { if (!e.target.closest(".opt") && UI.dlg && (!UI.dlg.choices || UI.dlg.i < UI.dlg.seg.length)) UI.key("ok"); });
+    const bar = document.createElement("div"); bar.id = "actbar";
+    bar.innerHTML = [["i", "Bag"], ["p", "Phone"], ["t", "Skip"], ["h", "Help"]].map(([k, l]) => `<button data-k="${k}"><b>${k.toUpperCase()}</b>${l}</button>`).join("");
+    $("hud").appendChild(bar);
+    bar.querySelectorAll("button").forEach((b) => (b.onclick = (e) => { e.stopPropagation(); sendKey(b.dataset.k, true); sendKey(b.dataset.k, false); }));
+    if (!TOUCH) return;
+    document.body.classList.add("touch");
+    const t = document.createElement("div"); t.id = "touch";
+    t.innerHTML = `<div class="dpad">${["ArrowUp", "ArrowLeft", "ArrowRight", "ArrowDown"].map((k) => `<button class="d ${k}" data-k="${k}" aria-label="${k.replace("Arrow", "")}"></button>`).join("")}</div>
+      <div class="ab"><button class="b" data-k="b" aria-label="Back">B</button><button class="a" data-k=" " aria-label="Talk or use">A</button></div>`;
+    document.body.appendChild(t);
+    const rot = document.createElement("div"); rot.id = "rotate";
+    rot.innerHTML = `<div><div class="phone"></div><p>Turn your phone sideways to play.</p><p class="dim">The game is too small to read this way up.</p></div>`;
+    document.body.appendChild(rot);
+    t.querySelectorAll("button").forEach((b) => {
+      const k = b.dataset.k, hold = k.startsWith("Arrow");
+      const down = (e) => { e.preventDefault(); b.classList.add("on"); sendKey(k, true); if (!hold) sendKey(k, false); };
+      const up = (e) => { e.preventDefault(); b.classList.remove("on"); if (hold) sendKey(k, false); };
+      b.addEventListener("pointerdown", down); b.addEventListener("pointerup", up); b.addEventListener("pointercancel", up); b.addEventListener("pointerleave", up);
+    });
+  }
+  window.addEventListener("load", () => { setupPointer(); resize(); titleScreen(); requestAnimationFrame(frame); });
 })();

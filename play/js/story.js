@@ -319,7 +319,7 @@
         await say("narr", "Tuesday. 7:00 AM. Your alarm has been going off for a while.");
         await say("you", "Five more minutes... no. Okay. Up.", "neutral");
         await card({ icon: "bag", title: "How to play", body: `<table class="keys">
-          <tr><td>Arrows / WASD</td><td>Walk</td></tr><tr><td>Space / E</td><td>Talk, use, confirm</td></tr>
+          <tr><td>Arrows / WASD, or tap</td><td>Walk (tap or click a spot)</td></tr><tr><td>Space / E</td><td>Talk, use, confirm</td></tr>
           <tr><td>B</td><td>Back / close a menu</td></tr><tr><td>I</td><td>Backpack</td></tr><tr><td>P</td><td>Phone</td></tr><tr><td>H</td><td>Help</td></tr></table>
           <p class="dim">Your goal is shown at the top. A yellow arrow marks where to go.</p>` });
         objective("Say good morning to Mom in the kitchen", { npc: "mom" });

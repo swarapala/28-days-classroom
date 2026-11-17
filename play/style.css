@@ -361,3 +361,48 @@ kbd {
 #objective .next { margin-top: calc(var(--u) * 1); font-size: calc(var(--u) * 6.3); color: var(--dim); }
 #objective .next b { color: var(--cream); }
 #objective .tkey { display: inline-block; margin-left: calc(var(--u) * 2); padding: 0 calc(var(--u) * 2); border-radius: calc(var(--u) * 1); background: #3a3150; color: var(--cream); }
+
+/* ---------- mouse and touch ---------- */
+#ui { touch-action: manipulation; }
+#actbar { position: absolute; right: calc(var(--u) * 4); top: calc(var(--u) * 46); display: flex; flex-direction: column; gap: calc(var(--u) * 2); pointer-events: auto; }
+#actbar button {
+  font: inherit; font-size: calc(var(--u) * 6); color: var(--cream); cursor: pointer; text-align: left;
+  background: rgba(29, 24, 40, 0.85); border: var(--u) solid #4a4064; border-radius: calc(var(--u) * 2);
+  padding: calc(var(--u) * 1) calc(var(--u) * 3); display: flex; align-items: center; gap: calc(var(--u) * 2.5);
+}
+#actbar button b { background: var(--cream); color: var(--ink); padding: 0 calc(var(--u) * 1.5); border-radius: calc(var(--u) * 1); font-weight: 400; }
+#actbar button:hover { border-color: var(--hl); }
+.row .arr { display: inline-block; padding: 0 calc(var(--u) * 2.5); color: var(--hl); cursor: pointer; }
+.row .arr:hover { color: #fff; }
+
+body.touch { -webkit-user-select: none; user-select: none; }
+#touch { position: fixed; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 50; }
+#touch button { pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; font-family: "Jersey 15", monospace; }
+#touch .dpad { position: fixed; left: 18px; bottom: 22px; width: 150px; height: 150px; }
+#touch .d { position: absolute; width: 52px; height: 52px; border-radius: 12px; border: 2px solid #f3e9d2; background: rgba(29, 24, 40, 0.72); }
+#touch .d::after { content: ""; position: absolute; left: 50%; top: 50%; width: 0; height: 0; border: 9px solid transparent; transform: translate(-50%, -50%); }
+#touch .ArrowUp { left: 49px; top: 0; } #touch .ArrowUp::after { border-bottom-color: #f3e9d2; margin-top: -5px; }
+#touch .ArrowDown { left: 49px; bottom: 0; } #touch .ArrowDown::after { border-top-color: #f3e9d2; margin-top: 5px; }
+#touch .ArrowLeft { left: 0; top: 49px; } #touch .ArrowLeft::after { border-right-color: #f3e9d2; margin-left: -5px; }
+#touch .ArrowRight { right: 0; top: 49px; } #touch .ArrowRight::after { border-left-color: #f3e9d2; margin-left: 5px; }
+#touch .ab { position: fixed; right: 18px; bottom: 30px; width: 150px; height: 120px; }
+#touch .a, #touch .b { position: absolute; width: 66px; height: 66px; border-radius: 50%; font-size: 30px; color: #1d1828; border: 3px solid #1d1828; box-shadow: 0 4px 0 rgba(0,0,0,.4); }
+#touch .a { right: 0; top: 0; background: #f2c14e; }
+#touch .b { left: 0; bottom: 0; background: #f3e9d2; }
+#touch .on { filter: brightness(1.25); transform: translateY(2px); }
+@media (orientation: portrait) { body.touch { align-items: flex-start; padding-top: 12px; } }
+@media (orientation: landscape) { #touch .d, #touch .a, #touch .b { opacity: 0.8; } }
+
+/* Phones held upright: the game would be too small to read, so ask for landscape. */
+#rotate { display: none; }
+@media (orientation: portrait) and (max-width: 600px) {
+  body.touch #rotate { display: flex; position: fixed; inset: 0; z-index: 100; background: #1d1828; color: #f3e9d2; align-items: center; justify-content: center; text-align: center; padding: 24px;
+    font: 22px/1.35 "Jersey 15", system-ui, sans-serif; }
+  body.touch #rotate .dim { color: #a59fb4; font-size: 17px; }
+  body.touch #rotate .phone { width: 46px; height: 76px; margin: 0 auto 18px; border: 4px solid #f3e9d2; border-radius: 9px; animation: tilt 2.2s ease-in-out infinite; }
+}
+@keyframes tilt { 0%, 30% { transform: rotate(0); } 60%, 100% { transform: rotate(-90deg); } }
+@media (orientation: landscape) and (max-height: 500px) {
+  #touch .dpad { left: 10px; bottom: 10px; transform: scale(0.82); transform-origin: left bottom; }
+  #touch .ab { right: 10px; bottom: 14px; transform: scale(0.82); transform-origin: right bottom; }
+}
