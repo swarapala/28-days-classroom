@@ -1085,6 +1085,7 @@
       if (this.dayCardState) { if (k === "ok") this.dayCardState(); return; }
       if (this.cardState) {
         if (k === "up" || k === "down") { const c = document.querySelector("#modal .card, #screen .endp"); if (c) c.scrollBy({ top: (k === "down" ? 1 : -1) * c.clientHeight * 0.4, behavior: "smooth" }); return; }
+        if (k === "phone" && this.printHook) { this.printHook(); return; }
         if (k === "ok" || k === "back") this.cardState(); return;
       }
       if (this.menuState) return this.menuKey(k);
@@ -1289,6 +1290,32 @@
   const card = (o) => UI.card(o);
 
   // ---------- ending ----------
+  // A clean, printable report card for students to hand in. Nothing is sent anywhere.
+  function printReport() {
+    const st = G.stats, acc = G.log.filter((l) => l.correct).length, q = G.quiz || { right: 0, total: 0 };
+    const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+    let el = document.getElementById("printcard");
+    if (!el) { el = document.createElement("div"); el.id = "printcard"; document.body.appendChild(el); }
+    el.innerHTML = `<h1>28 Days: Report Card</h1>
+      <p class="pc-sub">Classroom Edition · learn28days.org · printed ${date}</p>
+      <div class="pc-name"><span>Name: ______________________________</span><span>Class: ________________</span></div>
+      <table>
+        <tr><th>Health class quiz answers</th><td>${q.right} / ${q.total} correct</td></tr>
+        <tr><th>Unit test</th><td>${G.finalGrade || "not taken"}</td></tr>
+        <tr><th>Accurate tracker logs</th><td>${acc} / ${G.log.length}</td></tr>
+        <tr><th>Facts discovered</th><td>${factCount()[0]} / ${factCount()[1]}</td></tr>
+        <tr><th>Body Literacy score</th><td>${G.literacy}</td></tr>
+        <tr><th>Leaks</th><td>${G.leaks}</td></tr>
+        <tr><th>Ruby's health / energy / mood at the end</th><td>${Math.round(st.health)} / ${Math.round(st.energy)} / ${Math.round(st.mood)}</td></tr>
+      </table>
+      ${G.log.length ? `<h2>Cycle tracker log</h2><table class="pc-log"><tr><th>Day</th><th>Flow</th><th>Cramps</th><th>Mood</th><th>Matched the day?</th></tr>${G.log.map((l) => `<tr><td>${l.day}</td><td>${l.flow}</td><td>${l.cramps}/10</td><td>${l.mood}</td><td>${l.correct ? "yes" : "no"}</td></tr>`).join("")}</table>` : ""}
+      <h2>One thing I learned</h2><div class="pc-line"></div><div class="pc-line"></div>
+      <p class="pc-foot">28 Days is not medical advice. Questions about your own body? Talk to a parent or guardian, the school nurse, or a doctor.</p>`;
+    document.body.classList.add("printing");
+    const done = () => { document.body.classList.remove("printing"); removeEventListener("afterprint", done); };
+    addEventListener("afterprint", done);
+    setTimeout(() => window.print(), 50);
+  }
   async function ending() {
     RT.mode = "end";
     if (window.countEvent) countEvent("finished the game");
@@ -1312,9 +1339,12 @@
         <tr><td>Money left</td><td><b>$${G.money.toFixed(2)}</b></td></tr>
         <tr><td>Health / Energy / Mood</td><td><b>${Math.round(st.health)} / ${Math.round(st.energy)} / ${Math.round(st.mood)}</b></td></tr>
       </table>
+      <div class="endbtns"><button class="printbtn" id="end-print"><b>P</b> Print my report card</button></div>
       <div class="cbtn" id="end-next">▸ What you learned</div></div>`;
     el.innerHTML = page1;
-    await new Promise((r) => { const go = () => { UI.cardState = null; r(); }; $("end-next").onclick = go; UI.cardState = go; });
+    UI.printHook = printReport;
+    $("end-print").onclick = printReport;
+    await new Promise((r) => { const go = () => { UI.cardState = null; UI.printHook = null; r(); }; $("end-next").onclick = go; UI.cardState = go; });
     sfx.move();
     el.innerHTML = `<div class="panel endp learn">
       <div class="mtitle">What you learned</div>

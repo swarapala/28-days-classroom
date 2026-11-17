@@ -15,3 +15,6 @@ Every health fact was checked against CDC, ACOG and NIH pages. See [SOURCES.md](
 It has not yet been reviewed by a medical professional. Please have a school nurse or health teacher review it before using it with students. It is not medical advice.
 
 Created by Swara Palanivel. Built with Claude Code, an AI coding assistant. The original, just-for-fun version of the game is at https://swarapala.github.io/28-days/.
+
+- Privacy and terms of use: https://learn28days.org/privacy.html
+- License: CC BY-NC 4.0 (see [LICENSE.md](LICENSE.md))
