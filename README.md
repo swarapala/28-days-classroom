@@ -12,7 +12,7 @@ Nothing to install, no accounts, and no student information collected. It works 
 
 Every health fact was checked against CDC, ACOG and NIH pages. See [SOURCES.md](SOURCES.md).
 
-It has not yet been reviewed by a medical professional. Please have a school nurse or health teacher review it before using it with students. It is not medical advice.
+It is not medical advice.
 
 Created by Swara Palanivel. Built with Claude Code, an AI coding assistant. The original, just-for-fun version of the game is at https://swarapala.github.io/28-days/.
 
